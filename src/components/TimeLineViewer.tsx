@@ -7,6 +7,7 @@ import { Box, Typography } from "@mui/material";
 export type TimelineItem = {
   id: string | number;
   title: string;
+  where: string;
   start: Date;
   end: Date;
   color: string;
