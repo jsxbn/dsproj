@@ -3,7 +3,7 @@
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../theme"; // 위에서 만든 테마
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import localFont from "next/font/local";
 import CssBaseline from "@mui/material/CssBaseline";
 import { GlobalStyles } from "@mui/material";
@@ -35,7 +35,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                   },
                 }}
               />
-              {children}
+              <Suspense>{children}</Suspense>
             </ThemeProvider>
           </AppRouterCacheProvider>
         </SessionProvider>
