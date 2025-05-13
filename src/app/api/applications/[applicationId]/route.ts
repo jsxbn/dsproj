@@ -3,18 +3,19 @@ import { prisma } from "@/../lib/prismadb";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../utils/authOptions";
 
-export async function DELETE( 
-  _req: Request,
-  { params }: { params: { applicationId: string } }
-) {
+function getStudentID(email: string): string {
+  return email.slice(0, 6);
+}
+
+export async function DELETE(_req: Request, { params }: { params: { applicationId: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
   }
   const userID = await prisma.user.findUnique({
-    where: {studentNo: session.user!.email!.slice(0,6)},
-    select: {id:true}
-  })
+    where: { studentNo: session.user!.email!.slice(0, 6) },
+    select: { id: true },
+  });
 
   const application = await prisma.application.findUnique({
     where: { id: params.applicationId },
@@ -27,10 +28,7 @@ export async function DELETE(
   return NextResponse.json({ success: true });
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { applicationId: string } }
-) {
+export async function PATCH(req: Request, { params }: { params: { applicationId: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "로그인 필요" }, { status: 401 });

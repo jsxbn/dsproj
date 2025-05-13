@@ -1,6 +1,7 @@
 export const runtime = "nodejs";
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import prisma from "@/lib/prisma";
 
 export const authOptions: NextAuthOptions = {
   // 개발 모드에만 debug 찍고 싶다면
@@ -18,14 +19,22 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     // 이메일 도메인 검사
     async signIn({ user }) {
-      // user: User, account: Account|null, profile?: Profile, email?:{verificationRequest?:boolean}, credentials?:Record<string,any>
-      return user.email?.endsWith("@ksa.hs.kr") ?? false;
+      const isKsaMail = user.email?.endsWith("@ksa.hs.kr") ?? false;
+      if (!isKsaMail) return false;
+      const studentNo = user.email?.slice(0, 6);
+      let dbUser = await prisma.user.findUnique({ where: { studentNo } });
+      if (!dbUser) {
+        dbUser = await prisma.user.create({
+          data: {
+            studentNo,
+            name: user.name ?? "unknown", // user.name이 없는 경우 fallback
+          },
+        });
+      }
+      return true;
     },
   },
 
-  // App-router 에선 pages 옵션이 동작하긴 하는데
-  // 만약 제대로 리다이렉트 안 된다면, 아래 설정 빼고
-  // 로그인/에러 페이지에서 next-auth 에서 넘겨주는 오류를 직접 처리해 주세요
   pages: {
     signIn: "/login",
     error: "/login",
