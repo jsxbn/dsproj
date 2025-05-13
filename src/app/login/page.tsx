@@ -4,6 +4,7 @@
 import { useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@mui/material";
 
 export default function LoginPage() {
   const { status } = useSession();
@@ -33,11 +34,12 @@ export default function LoginPage() {
         alignItems: "center",
         justifyContent: "center",
         height: "100vh",
-        gap: 20,
+        gap: 10,
       }}
     >
-      <h1 style={{ fontSize: 32, fontWeight: "bold" }}>로그인</h1>
-      <button
+      <h1 style={{ fontSize: 32, fontWeight: "bold" }}>SACHEDULE</h1>
+      <Button
+        variant="outlined"
         onClick={() =>
           signIn("google", {
             callbackUrl: "/",
@@ -49,8 +51,8 @@ export default function LoginPage() {
           cursor: "pointer",
         }}
       >
-        Google 계정으로 로그인
-      </button>
+        Google(@ksa.hs.kr)로 로그인
+      </Button>
     </div>
   );
 }

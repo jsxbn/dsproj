@@ -1,8 +1,5 @@
 import { TimelineItem } from "@/components/TimeLineViewer";
 
-
-
-
 const viridis = [
   "#e41a1c", // red
   "#377eb8", // blue
@@ -40,7 +37,7 @@ const items: TimelineItem[] = [
   {
     id: 4,
     title: "개막식",
-    where: '대강당',
+    where: "대강당",
     start: new Date("2024-11-01T09:00:00"),
     end: new Date("2024-11-01T10:00:00"),
     color: viridis[0],
@@ -48,7 +45,7 @@ const items: TimelineItem[] = [
   {
     id: 5,
     title: "인문학 겨루기 대회",
-    where: '대강당',
+    where: "대강당",
     start: new Date("2024-11-01T10:00:00"),
     end: new Date("2024-11-01T11:30:00"),
     color: viridis[1],
@@ -56,7 +53,7 @@ const items: TimelineItem[] = [
   {
     id: 6,
     title: "크사랑 문방구",
-    where: '본관 1층',
+    where: "본관 1층",
     start: new Date("2024-11-01T11:30:00"),
     end: new Date("2024-11-01T13:00:00"),
     color: viridis[2],
@@ -64,7 +61,7 @@ const items: TimelineItem[] = [
   {
     id: 7,
     title: "체크메이트",
-    where: '3303',
+    where: "3303",
     start: new Date("2024-11-01T10:30:00"),
     end: new Date("2024-11-01T19:00:00"),
     color: viridis[3],
@@ -72,7 +69,7 @@ const items: TimelineItem[] = [
   {
     id: 8,
     title: "IDEV",
-    where: '3404',
+    where: "3404",
     start: new Date("2024-11-01T08:00:00"),
     end: new Date("2024-11-01T23:59:59"),
     color: viridis[4],
@@ -80,7 +77,7 @@ const items: TimelineItem[] = [
   {
     id: 9,
     title: "인간 대기계 – 카일",
-    where: '본관 1층',
+    where: "본관 1층",
     start: new Date("2024-11-01T10:30:00"),
     end: new Date("2024-11-01T19:00:00"),
     color: viridis[5],
@@ -96,7 +93,7 @@ const items: TimelineItem[] = [
   {
     id: 11,
     title: "낭발바닥",
-    where: '탐2~형1',
+    where: "탐2~형1",
     start: new Date("2024-11-01T08:00:00"),
     end: new Date("2024-11-01T23:59:59"),
     color: viridis[1],
@@ -104,7 +101,7 @@ const items: TimelineItem[] = [
   {
     id: 12,
     title: "케미파일",
-    where: '형4 EOZ',
+    where: "형4 EOZ",
     start: new Date("2024-11-01T10:30:00"),
     end: new Date("2024-11-01T19:00:00"),
     color: viridis[2],
@@ -112,7 +109,7 @@ const items: TimelineItem[] = [
   {
     id: 13,
     title: "빅프로젝트",
-    where: '세실 A,B',
+    where: "세실 A,B",
     start: new Date("2024-11-01T08:00:00"),
     end: new Date("2024-11-01T23:59:59"),
     color: viridis[3],
@@ -120,7 +117,7 @@ const items: TimelineItem[] = [
   {
     id: 14,
     title: "루비콘",
-    where: '3302~3',
+    where: "3302~3",
     start: new Date("2024-11-01T08:00:00"),
     end: new Date("2024-11-01T23:59:59"),
     color: viridis[4],
@@ -128,7 +125,7 @@ const items: TimelineItem[] = [
   {
     id: 15,
     title: "클럽대항전",
-    where: '대강당',
+    where: "대강당",
     start: new Date("2024-11-01T19:00:00"),
     end: new Date("2024-11-01T21:00:00"),
     color: viridis[5],
@@ -136,7 +133,7 @@ const items: TimelineItem[] = [
   {
     id: 16,
     title: "비나리",
-    where: '3402',
+    where: "3402",
     start: new Date("2024-11-01T08:00:00"),
     end: new Date("2024-11-01T23:59:59"),
     color: viridis[0],

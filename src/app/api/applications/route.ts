@@ -19,14 +19,10 @@ export async function POST(req: Request) {
     const userID = await prisma.user.findUnique({
       where : {studentNo: getStudentID(session.user!.email!)},
       select: {id:true}
-    })
-
-    const boothID = await prisma.booth.findUnique({
-      where: {name: boothId},
-      select: {id:true}
-    })
+    }
+    )
     const application = await prisma.application.create({
-      data: { boothId: boothID, userId: userID, slotIndex },
+      data: { boothId, userId: userID, slotIndex },
     });
     return NextResponse.json(application, { status: 201 });
   } catch (e: any) {

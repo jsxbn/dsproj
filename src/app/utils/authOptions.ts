@@ -4,7 +4,6 @@ import GoogleProvider from "next-auth/providers/google";
 
 export const authOptions: NextAuthOptions = {
   // 개발 모드에만 debug 찍고 싶다면
-  debug: process.env.NODE_ENV === "development",
 
   providers: [
     GoogleProvider({

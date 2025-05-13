@@ -12,6 +12,9 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: "var(--font-pretendard), sans-serif",
+    button: {
+      textTransform: "none",
+    },
   },
 });
 
