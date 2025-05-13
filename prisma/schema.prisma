@@ -10,7 +10,6 @@ generator client {
 
 model User {
   id        String   @id @default(uuid())
-  email     String   @unique
   studentNo String   @unique
   name      String
   createdAt DateTime @default(now())
@@ -25,6 +24,7 @@ model Booth {
   description  String?
   operatorId   String
   operator     User     @relation("OperatorBooths", fields: [operatorId], references: [id])
+  where        String
   startAt      DateTime // 운영 시작
   endAt        DateTime // 운영 종료
   slotInterval Int // 분 단위 세션 길이
@@ -45,5 +45,5 @@ model Application {
   isAccepted Boolean  @default(false) // false = 대기 or 거절, true = 수락
   createdAt  DateTime @default(now())
 
-  @@unique([boothId, slotIndex, userId]) // 같은 사용자, 같은 세션 중복 신청 방지
+  @@unique([boothId, slotIndex, userId]) // 같은 사람이 같은 슬롯 중복 신청 방지
 }

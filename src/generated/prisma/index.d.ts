@@ -1133,7 +1133,6 @@ export namespace Prisma {
 
   export type UserMinAggregateOutputType = {
     id: string | null
-    email: string | null
     studentNo: string | null
     name: string | null
     createdAt: Date | null
@@ -1141,7 +1140,6 @@ export namespace Prisma {
 
   export type UserMaxAggregateOutputType = {
     id: string | null
-    email: string | null
     studentNo: string | null
     name: string | null
     createdAt: Date | null
@@ -1149,7 +1147,6 @@ export namespace Prisma {
 
   export type UserCountAggregateOutputType = {
     id: number
-    email: number
     studentNo: number
     name: number
     createdAt: number
@@ -1159,7 +1156,6 @@ export namespace Prisma {
 
   export type UserMinAggregateInputType = {
     id?: true
-    email?: true
     studentNo?: true
     name?: true
     createdAt?: true
@@ -1167,7 +1163,6 @@ export namespace Prisma {
 
   export type UserMaxAggregateInputType = {
     id?: true
-    email?: true
     studentNo?: true
     name?: true
     createdAt?: true
@@ -1175,7 +1170,6 @@ export namespace Prisma {
 
   export type UserCountAggregateInputType = {
     id?: true
-    email?: true
     studentNo?: true
     name?: true
     createdAt?: true
@@ -1256,7 +1250,6 @@ export namespace Prisma {
 
   export type UserGroupByOutputType = {
     id: string
-    email: string
     studentNo: string
     name: string
     createdAt: Date
@@ -1281,7 +1274,6 @@ export namespace Prisma {
 
   export type UserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    email?: boolean
     studentNo?: boolean
     name?: boolean
     createdAt?: boolean
@@ -1292,7 +1284,6 @@ export namespace Prisma {
 
   export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    email?: boolean
     studentNo?: boolean
     name?: boolean
     createdAt?: boolean
@@ -1300,7 +1291,6 @@ export namespace Prisma {
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    email?: boolean
     studentNo?: boolean
     name?: boolean
     createdAt?: boolean
@@ -1308,13 +1298,12 @@ export namespace Prisma {
 
   export type UserSelectScalar = {
     id?: boolean
-    email?: boolean
     studentNo?: boolean
     name?: boolean
     createdAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "studentNo" | "name" | "createdAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "studentNo" | "name" | "createdAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     booths?: boolean | User$boothsArgs<ExtArgs>
     applications?: boolean | User$applicationsArgs<ExtArgs>
@@ -1331,7 +1320,6 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      email: string
       studentNo: string
       name: string
       createdAt: Date
@@ -1761,7 +1749,6 @@ export namespace Prisma {
    */
   interface UserFieldRefs {
     readonly id: FieldRef<"User", 'String'>
-    readonly email: FieldRef<"User", 'String'>
     readonly studentNo: FieldRef<"User", 'String'>
     readonly name: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
@@ -2246,6 +2233,7 @@ export namespace Prisma {
     name: string | null
     description: string | null
     operatorId: string | null
+    where: string | null
     startAt: Date | null
     endAt: Date | null
     slotInterval: number | null
@@ -2258,6 +2246,7 @@ export namespace Prisma {
     name: string | null
     description: string | null
     operatorId: string | null
+    where: string | null
     startAt: Date | null
     endAt: Date | null
     slotInterval: number | null
@@ -2270,6 +2259,7 @@ export namespace Prisma {
     name: number
     description: number
     operatorId: number
+    where: number
     startAt: number
     endAt: number
     slotInterval: number
@@ -2294,6 +2284,7 @@ export namespace Prisma {
     name?: true
     description?: true
     operatorId?: true
+    where?: true
     startAt?: true
     endAt?: true
     slotInterval?: true
@@ -2306,6 +2297,7 @@ export namespace Prisma {
     name?: true
     description?: true
     operatorId?: true
+    where?: true
     startAt?: true
     endAt?: true
     slotInterval?: true
@@ -2318,6 +2310,7 @@ export namespace Prisma {
     name?: true
     description?: true
     operatorId?: true
+    where?: true
     startAt?: true
     endAt?: true
     slotInterval?: true
@@ -2417,6 +2410,7 @@ export namespace Prisma {
     name: string
     description: string | null
     operatorId: string
+    where: string
     startAt: Date
     endAt: Date
     slotInterval: number
@@ -2448,6 +2442,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     operatorId?: boolean
+    where?: boolean
     startAt?: boolean
     endAt?: boolean
     slotInterval?: boolean
@@ -2463,6 +2458,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     operatorId?: boolean
+    where?: boolean
     startAt?: boolean
     endAt?: boolean
     slotInterval?: boolean
@@ -2476,6 +2472,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     operatorId?: boolean
+    where?: boolean
     startAt?: boolean
     endAt?: boolean
     slotInterval?: boolean
@@ -2489,6 +2486,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     operatorId?: boolean
+    where?: boolean
     startAt?: boolean
     endAt?: boolean
     slotInterval?: boolean
@@ -2496,7 +2494,7 @@ export namespace Prisma {
     createdAt?: boolean
   }
 
-  export type BoothOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "operatorId" | "startAt" | "endAt" | "slotInterval" | "capacity" | "createdAt", ExtArgs["result"]["booth"]>
+  export type BoothOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "operatorId" | "where" | "startAt" | "endAt" | "slotInterval" | "capacity" | "createdAt", ExtArgs["result"]["booth"]>
   export type BoothInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     operator?: boolean | UserDefaultArgs<ExtArgs>
     applications?: boolean | Booth$applicationsArgs<ExtArgs>
@@ -2520,6 +2518,7 @@ export namespace Prisma {
       name: string
       description: string | null
       operatorId: string
+      where: string
       startAt: Date
       endAt: Date
       slotInterval: number
@@ -2954,6 +2953,7 @@ export namespace Prisma {
     readonly name: FieldRef<"Booth", 'String'>
     readonly description: FieldRef<"Booth", 'String'>
     readonly operatorId: FieldRef<"Booth", 'String'>
+    readonly where: FieldRef<"Booth", 'String'>
     readonly startAt: FieldRef<"Booth", 'DateTime'>
     readonly endAt: FieldRef<"Booth", 'DateTime'>
     readonly slotInterval: FieldRef<"Booth", 'Int'>
@@ -4526,7 +4526,6 @@ export namespace Prisma {
 
   export const UserScalarFieldEnum: {
     id: 'id',
-    email: 'email',
     studentNo: 'studentNo',
     name: 'name',
     createdAt: 'createdAt'
@@ -4540,6 +4539,7 @@ export namespace Prisma {
     name: 'name',
     description: 'description',
     operatorId: 'operatorId',
+    where: 'where',
     startAt: 'startAt',
     endAt: 'endAt',
     slotInterval: 'slotInterval',
@@ -4662,7 +4662,6 @@ export namespace Prisma {
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
     id?: StringFilter<"User"> | string
-    email?: StringFilter<"User"> | string
     studentNo?: StringFilter<"User"> | string
     name?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
@@ -4672,7 +4671,6 @@ export namespace Prisma {
 
   export type UserOrderByWithRelationInput = {
     id?: SortOrder
-    email?: SortOrder
     studentNo?: SortOrder
     name?: SortOrder
     createdAt?: SortOrder
@@ -4682,7 +4680,6 @@ export namespace Prisma {
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    email?: string
     studentNo?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
@@ -4691,11 +4688,10 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     booths?: BoothListRelationFilter
     applications?: ApplicationListRelationFilter
-  }, "id" | "email" | "studentNo">
+  }, "id" | "studentNo">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
-    email?: SortOrder
     studentNo?: SortOrder
     name?: SortOrder
     createdAt?: SortOrder
@@ -4709,7 +4705,6 @@ export namespace Prisma {
     OR?: UserScalarWhereWithAggregatesInput[]
     NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"User"> | string
-    email?: StringWithAggregatesFilter<"User"> | string
     studentNo?: StringWithAggregatesFilter<"User"> | string
     name?: StringWithAggregatesFilter<"User"> | string
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -4723,6 +4718,7 @@ export namespace Prisma {
     name?: StringFilter<"Booth"> | string
     description?: StringNullableFilter<"Booth"> | string | null
     operatorId?: StringFilter<"Booth"> | string
+    where?: StringFilter<"Booth"> | string
     startAt?: DateTimeFilter<"Booth"> | Date | string
     endAt?: DateTimeFilter<"Booth"> | Date | string
     slotInterval?: IntFilter<"Booth"> | number
@@ -4737,6 +4733,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrderInput | SortOrder
     operatorId?: SortOrder
+    where?: SortOrder
     startAt?: SortOrder
     endAt?: SortOrder
     slotInterval?: SortOrder
@@ -4754,6 +4751,7 @@ export namespace Prisma {
     name?: StringFilter<"Booth"> | string
     description?: StringNullableFilter<"Booth"> | string | null
     operatorId?: StringFilter<"Booth"> | string
+    where?: StringFilter<"Booth"> | string
     startAt?: DateTimeFilter<"Booth"> | Date | string
     endAt?: DateTimeFilter<"Booth"> | Date | string
     slotInterval?: IntFilter<"Booth"> | number
@@ -4768,6 +4766,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrderInput | SortOrder
     operatorId?: SortOrder
+    where?: SortOrder
     startAt?: SortOrder
     endAt?: SortOrder
     slotInterval?: SortOrder
@@ -4788,6 +4787,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Booth"> | string
     description?: StringNullableWithAggregatesFilter<"Booth"> | string | null
     operatorId?: StringWithAggregatesFilter<"Booth"> | string
+    where?: StringWithAggregatesFilter<"Booth"> | string
     startAt?: DateTimeWithAggregatesFilter<"Booth"> | Date | string
     endAt?: DateTimeWithAggregatesFilter<"Booth"> | Date | string
     slotInterval?: IntWithAggregatesFilter<"Booth"> | number
@@ -4863,7 +4863,6 @@ export namespace Prisma {
 
   export type UserCreateInput = {
     id?: string
-    email: string
     studentNo: string
     name: string
     createdAt?: Date | string
@@ -4873,7 +4872,6 @@ export namespace Prisma {
 
   export type UserUncheckedCreateInput = {
     id?: string
-    email: string
     studentNo: string
     name: string
     createdAt?: Date | string
@@ -4883,7 +4881,6 @@ export namespace Prisma {
 
   export type UserUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
     studentNo?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4893,7 +4890,6 @@ export namespace Prisma {
 
   export type UserUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
     studentNo?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4903,7 +4899,6 @@ export namespace Prisma {
 
   export type UserCreateManyInput = {
     id?: string
-    email: string
     studentNo: string
     name: string
     createdAt?: Date | string
@@ -4911,7 +4906,6 @@ export namespace Prisma {
 
   export type UserUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
     studentNo?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4919,7 +4913,6 @@ export namespace Prisma {
 
   export type UserUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
     studentNo?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4929,6 +4922,7 @@ export namespace Prisma {
     id?: string
     name: string
     description?: string | null
+    where: string
     startAt: Date | string
     endAt: Date | string
     slotInterval: number
@@ -4943,6 +4937,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     operatorId: string
+    where: string
     startAt: Date | string
     endAt: Date | string
     slotInterval: number
@@ -4955,6 +4950,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    where?: StringFieldUpdateOperationsInput | string
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: DateTimeFieldUpdateOperationsInput | Date | string
     slotInterval?: IntFieldUpdateOperationsInput | number
@@ -4969,6 +4965,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     operatorId?: StringFieldUpdateOperationsInput | string
+    where?: StringFieldUpdateOperationsInput | string
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: DateTimeFieldUpdateOperationsInput | Date | string
     slotInterval?: IntFieldUpdateOperationsInput | number
@@ -4982,6 +4979,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     operatorId: string
+    where: string
     startAt: Date | string
     endAt: Date | string
     slotInterval: number
@@ -4993,6 +4991,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    where?: StringFieldUpdateOperationsInput | string
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: DateTimeFieldUpdateOperationsInput | Date | string
     slotInterval?: IntFieldUpdateOperationsInput | number
@@ -5005,6 +5004,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     operatorId?: StringFieldUpdateOperationsInput | string
+    where?: StringFieldUpdateOperationsInput | string
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: DateTimeFieldUpdateOperationsInput | Date | string
     slotInterval?: IntFieldUpdateOperationsInput | number
@@ -5121,7 +5121,6 @@ export namespace Prisma {
 
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
-    email?: SortOrder
     studentNo?: SortOrder
     name?: SortOrder
     createdAt?: SortOrder
@@ -5129,7 +5128,6 @@ export namespace Prisma {
 
   export type UserMaxOrderByAggregateInput = {
     id?: SortOrder
-    email?: SortOrder
     studentNo?: SortOrder
     name?: SortOrder
     createdAt?: SortOrder
@@ -5137,7 +5135,6 @@ export namespace Prisma {
 
   export type UserMinOrderByAggregateInput = {
     id?: SortOrder
-    email?: SortOrder
     studentNo?: SortOrder
     name?: SortOrder
     createdAt?: SortOrder
@@ -5216,6 +5213,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrder
     operatorId?: SortOrder
+    where?: SortOrder
     startAt?: SortOrder
     endAt?: SortOrder
     slotInterval?: SortOrder
@@ -5233,6 +5231,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrder
     operatorId?: SortOrder
+    where?: SortOrder
     startAt?: SortOrder
     endAt?: SortOrder
     slotInterval?: SortOrder
@@ -5245,6 +5244,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrder
     operatorId?: SortOrder
+    where?: SortOrder
     startAt?: SortOrder
     endAt?: SortOrder
     slotInterval?: SortOrder
@@ -5695,6 +5695,7 @@ export namespace Prisma {
     id?: string
     name: string
     description?: string | null
+    where: string
     startAt: Date | string
     endAt: Date | string
     slotInterval: number
@@ -5707,6 +5708,7 @@ export namespace Prisma {
     id?: string
     name: string
     description?: string | null
+    where: string
     startAt: Date | string
     endAt: Date | string
     slotInterval: number
@@ -5775,6 +5777,7 @@ export namespace Prisma {
     name?: StringFilter<"Booth"> | string
     description?: StringNullableFilter<"Booth"> | string | null
     operatorId?: StringFilter<"Booth"> | string
+    where?: StringFilter<"Booth"> | string
     startAt?: DateTimeFilter<"Booth"> | Date | string
     endAt?: DateTimeFilter<"Booth"> | Date | string
     slotInterval?: IntFilter<"Booth"> | number
@@ -5812,7 +5815,6 @@ export namespace Prisma {
 
   export type UserCreateWithoutBoothsInput = {
     id?: string
-    email: string
     studentNo: string
     name: string
     createdAt?: Date | string
@@ -5821,7 +5823,6 @@ export namespace Prisma {
 
   export type UserUncheckedCreateWithoutBoothsInput = {
     id?: string
-    email: string
     studentNo: string
     name: string
     createdAt?: Date | string
@@ -5872,7 +5873,6 @@ export namespace Prisma {
 
   export type UserUpdateWithoutBoothsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
     studentNo?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -5881,7 +5881,6 @@ export namespace Prisma {
 
   export type UserUncheckedUpdateWithoutBoothsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
     studentNo?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -5908,6 +5907,7 @@ export namespace Prisma {
     id?: string
     name: string
     description?: string | null
+    where: string
     startAt: Date | string
     endAt: Date | string
     slotInterval: number
@@ -5921,6 +5921,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     operatorId: string
+    where: string
     startAt: Date | string
     endAt: Date | string
     slotInterval: number
@@ -5935,7 +5936,6 @@ export namespace Prisma {
 
   export type UserCreateWithoutApplicationsInput = {
     id?: string
-    email: string
     studentNo: string
     name: string
     createdAt?: Date | string
@@ -5944,7 +5944,6 @@ export namespace Prisma {
 
   export type UserUncheckedCreateWithoutApplicationsInput = {
     id?: string
-    email: string
     studentNo: string
     name: string
     createdAt?: Date | string
@@ -5971,6 +5970,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    where?: StringFieldUpdateOperationsInput | string
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: DateTimeFieldUpdateOperationsInput | Date | string
     slotInterval?: IntFieldUpdateOperationsInput | number
@@ -5984,6 +5984,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     operatorId?: StringFieldUpdateOperationsInput | string
+    where?: StringFieldUpdateOperationsInput | string
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: DateTimeFieldUpdateOperationsInput | Date | string
     slotInterval?: IntFieldUpdateOperationsInput | number
@@ -6004,7 +6005,6 @@ export namespace Prisma {
 
   export type UserUpdateWithoutApplicationsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
     studentNo?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6013,7 +6013,6 @@ export namespace Prisma {
 
   export type UserUncheckedUpdateWithoutApplicationsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
     studentNo?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6024,6 +6023,7 @@ export namespace Prisma {
     id?: string
     name: string
     description?: string | null
+    where: string
     startAt: Date | string
     endAt: Date | string
     slotInterval: number
@@ -6043,6 +6043,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    where?: StringFieldUpdateOperationsInput | string
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: DateTimeFieldUpdateOperationsInput | Date | string
     slotInterval?: IntFieldUpdateOperationsInput | number
@@ -6055,6 +6056,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    where?: StringFieldUpdateOperationsInput | string
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: DateTimeFieldUpdateOperationsInput | Date | string
     slotInterval?: IntFieldUpdateOperationsInput | number
@@ -6067,6 +6069,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    where?: StringFieldUpdateOperationsInput | string
     startAt?: DateTimeFieldUpdateOperationsInput | Date | string
     endAt?: DateTimeFieldUpdateOperationsInput | Date | string
     slotInterval?: IntFieldUpdateOperationsInput | number
