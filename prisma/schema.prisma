@@ -7,16 +7,14 @@ datasource db {
 // Define custom output path for generated Prisma Client
 generator client {
   provider = "prisma-client-js"
-  output   = "/app/generated/prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 // Example data model
 model User {
   id        String   @id @default(uuid())
-  email     String   @unique
   studentNo String   @unique
   name      String
-  role      Role     @default(STUDENT)
   createdAt DateTime @default(now())
 
   booths       Booth[]       @relation("OperatorBooths")
@@ -29,6 +27,7 @@ model Booth {
   description  String?
   operatorId   String
   operator     User     @relation("OperatorBooths", fields: [operatorId], references: [id])
+  where        String
   startAt      DateTime // 운영 시작
   endAt        DateTime // 운영 종료
   slotInterval Int // 분 단위 세션 길이
@@ -52,8 +51,3 @@ model Application {
   @@unique([boothId, slotIndex, userId]) // 같은 사람이 같은 슬롯 중복 신청 방지
 }
 
-enum Role {
-  STUDENT
-  OPERATOR
-  ADMIN
-}

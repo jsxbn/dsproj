@@ -49,7 +49,7 @@ export default function MyApp() {
         <h1>SAC_HEDULE</h1>
       </div>
       <h1 style={{ fontWeight: 200, color: "red", fontFamily: "times", fontSize: 40 }}>
-        <strong>5</strong>일남았다 좆됐다!
+        <strong>4</strong>일남았다 좆됐다!
       </h1>
       <Container sx={{ py: 4 }}>
         <SegmentedControl options={options} value={view} onChange={setView} />
