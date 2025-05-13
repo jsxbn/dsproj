@@ -11,7 +11,7 @@
 !.yarn/versions
 
 # prisma generated folder
-src/generated/
+src/generated/*
 
 # testing
 /coverage
