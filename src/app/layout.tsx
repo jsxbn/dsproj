@@ -8,6 +8,7 @@ import localFont from "next/font/local";
 import CssBaseline from "@mui/material/CssBaseline";
 import { GlobalStyles } from "@mui/material";
 import { SessionProvider } from "next-auth/react";
+import NavigationBar from "@/components/Navbar";
 
 const pretendard = localFont({
   src: "../fonts/PretendardVariable.woff2",
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                   },
                 }}
               />
+              <NavigationBar></NavigationBar>
               <Suspense>{children}</Suspense>
             </ThemeProvider>
           </AppRouterCacheProvider>

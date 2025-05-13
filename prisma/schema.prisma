@@ -1,22 +1,18 @@
-// Define database connection via the `DATABASE_URL` env var
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// Define custom output path for generated Prisma Client
 generator client {
   provider = "prisma-client-js"
-  output   = "/app/generated/prisma-client"
+  output   = "../src/generated/prisma"
 }
 
-// Example data model
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   studentNo String   @unique
   name      String
-  role      Role     @default(STUDENT)
   createdAt DateTime @default(now())
 
   booths       Booth[]       @relation("OperatorBooths")
@@ -44,16 +40,10 @@ model Application {
   booth     Booth  @relation(fields: [boothId], references: [id], onDelete: Cascade)
   userId    String
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  slotIndex Int // 0부터 시작
+  slotIndex Int // 0부터 시작: booth 운영시간/interval에 따라 세션 인덱스 결정
 
   isAccepted Boolean  @default(false) // false = 대기 or 거절, true = 수락
   createdAt  DateTime @default(now())
 
-  @@unique([boothId, slotIndex, userId]) // 같은 사람이 같은 슬롯 중복 신청 방지
-}
-
-enum Role {
-  STUDENT
-  OPERATOR
-  ADMIN
+  @@unique([boothId, slotIndex, userId]) // 같은 사용자, 같은 세션 중복 신청 방지
 }

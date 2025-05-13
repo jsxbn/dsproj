@@ -17,18 +17,25 @@ const TimeLineViewer = dynamic(() => import("../components/TimeLineViewer"), {
 export default function MyApp() {
   const session = useSession();
   const router = useRouter();
-  const today = new Date("2025-11-01");
-  today.setHours(9, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
-  const [view, setView] = useState<string>("one");
+  const [view, setView] = useState<string>("2024-11-01");
 
   useEffect(() => {
     if (session.status === "unauthenticated") {
       router.replace("/login");
     }
   }, [session.status, router]);
+
+  function getSelectedDay(dateString: string) {
+    const d = new Date(dateString);
+    d.setHours(9, 0, 0, 0);
+    return d;
+  }
+  function getTomorrow(dateString: string) {
+    const d = new Date(dateString);
+    d.setDate(d.getDate() + 1);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
 
   if (session.status !== "authenticated") {
     return (
@@ -37,33 +44,30 @@ export default function MyApp() {
   }
 
   const options: Option[] = [
-    { value: "one", label: "전야제" },
-    { value: "two", label: "1일차" },
-    { value: "three", label: "2일차" },
-    { value: "four", label: "3일차" },
+    { value: "2024-10-31", label: "전야제" },
+    { value: "2024-11-01", label: "1일차" },
+    { value: "2024-11-02", label: "2일차" },
+    { value: "2024-11-03", label: "3일차" },
   ];
 
   return (
-    <Box px={2}>
-      <div style={{}}>
-        <h1>SAC_HEDULE</h1>
-      </div>
+    <Box px={2} maxWidth={3000}>
       <h1 style={{ fontWeight: 200, color: "red", fontFamily: "times", fontSize: 40 }}>
-        <strong>5</strong>일남았다 좆됐다!
+        <strong></strong>하석준바보
       </h1>
-      <Container sx={{ py: 4 }}>
+      <Box sx={{ py: 4 }}>
         <SegmentedControl options={options} value={view} onChange={setView} />
         <TimeLineViewer
           items={items}
           // 하루 전체 00:00 ~ 24:00 고정
-          rangeStart={today}
-          rangeEnd={tomorrow}
+          rangeStart={getSelectedDay(view)}
+          rangeEnd={getTomorrow(view)}
           // 6시간마다 라인
           markerIntervalHours={3}
           // marker 라벨 영역 공간(px)
-          markerLabelHeight={20}
+          markerLabelHeight={30}
           // 한 줄 높이(px)
-          laneHeight={40}
+          laneHeight={45}
           // bar 위아래 여백(px)
           barVerticalPadding={6}
           // Now 라인 색상
@@ -71,7 +75,7 @@ export default function MyApp() {
           // marker 라인 색상
           markerLineColor="#CCC"
         />
-      </Container>
+      </Box>
       <Button>click here</Button>
     </Box>
   );

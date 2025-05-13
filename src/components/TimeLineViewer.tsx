@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Tooltip, Typography } from "@mui/material";
 
 export type TimelineItem = {
   id: string | number;
@@ -124,7 +124,7 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
         position: "relative",
         width: "100%",
         height: containerHeight,
-        border: "1px solid #EEE",
+        // border: "1px solid #EEE",
         overflow: "hidden",
       }}
     >
@@ -139,7 +139,7 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
               top: markerLabelHeight,
               bottom: 0,
               left: `${left}%`,
-              borderLeft: `1px dashed ${markerLineColor}`,
+              borderLeft: `1px solid ${markerLineColor}`,
               zIndex: 1,
             }}
           />
@@ -177,29 +177,31 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
         const height = laneHeight - barVerticalPadding * 2;
 
         return (
-          <Box
-            key={it.id}
-            sx={{
-              position: "absolute",
-              top,
-              left: `${sPct}%`,
-              width: `${wPct}%`,
-              height,
-              bgcolor: it.color,
-              borderRadius: 1,
-              px: 0.5,
-              display: "flex",
-              alignItems: "center",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              zIndex: 3,
-            }}
-          >
-            <Typography variant="caption" sx={{ color: "#fff", fontWeight: 600 }}>
-              {it.title}
-            </Typography>
-          </Box>
+          <Tooltip key={it.id} title={it.title}>
+            <Box
+              key={it.id}
+              sx={{
+                position: "absolute",
+                top,
+                left: `${sPct}%`,
+                width: `${wPct}%`,
+                height,
+                bgcolor: it.color,
+                borderRadius: 100,
+                px: 1.0,
+                display: "flex",
+                alignItems: "center",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                zIndex: 3,
+              }}
+            >
+              <Typography variant="caption" sx={{ color: "#fff", fontWeight: 600 }}>
+                {it.title}
+              </Typography>
+            </Box>
+          </Tooltip>
         );
       })}
 
