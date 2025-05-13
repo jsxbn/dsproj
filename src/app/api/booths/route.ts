@@ -39,7 +39,7 @@ export async function POST(req: Request) {
       endAt: new Date(endAt),
       slotInterval,
       capacity,
-      operatorId: userID,
+      operatorId: userID.id,
     },
   });
 

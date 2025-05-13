@@ -19,12 +19,27 @@ export async function POST(req: Request) {
     const userID = await prisma.user.findUnique({
       where : {studentNo: getStudentID(session.user!.email!)},
       select: {id:true}
+    })
+    const boothID = await prisma.booth.findUnique({
+      where: {name: boothId},
+      select: {id:true}
+    })
+    const booth = await prisma.booth.findUnique({ where: { id: boothID.id } });
+    if (!booth) {
+      return NextResponse.json({ error: "부스를 찾을 수 없습니다." }, { status: 404 });
     }
-    )
+  
     const application = await prisma.application.create({
-      data: { boothId, userId: userID, slotIndex },
+      data: {
+        boothId: boothID.id,
+        userId: userID.id,
+        slotIndex,
+        // isAccepted는 기본값(false)이므로 생략 가능
+      },
     });
+  
     return NextResponse.json(application, { status: 201 });
+
   } catch (e: any) {
     if (e.code === "P2002") {
       return NextResponse.json(
