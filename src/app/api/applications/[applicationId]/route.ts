@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/../lib/prismadb";
+import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../utils/authOptions";
 
-function getStudentID(email: string): string {
-  return email.slice(0, 6);
-}
-
-export async function DELETE(_req: Request, { params }: { params: { applicationId: string } }) {
+export async function DELETE(_req: Request, context: { params: { applicationId: string } }) {
+  const params = await context.params;
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
@@ -20,7 +17,7 @@ export async function DELETE(_req: Request, { params }: { params: { applicationI
   const application = await prisma.application.findUnique({
     where: { id: params.applicationId },
   });
-  if (!application || application.userId !== userID.id) {
+  if (!application || application.userId !== userID!.id) {
     return NextResponse.json({ error: "취소 권한 없음" }, { status: 403 });
   }
 
@@ -28,7 +25,8 @@ export async function DELETE(_req: Request, { params }: { params: { applicationI
   return NextResponse.json({ success: true });
 }
 
-export async function PATCH(req: Request, { params }: { params: { applicationId: string } }) {
+export async function PATCH(req: Request, context: { params: { applicationId: string } }) {
+  const params = await context.params;
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
@@ -52,16 +50,13 @@ export async function PATCH(req: Request, { params }: { params: { applicationId:
     // 이미 승인된 신청 수만 세기
     const approvedCount = await prisma.application.count({
       where: {
-        boothId:   app.boothId,
+        boothId: app.boothId,
         slotIndex: app.slotIndex,
         isAccepted: true,
       },
     });
     if (approvedCount >= booth.capacity) {
-      return NextResponse.json(
-        { error: "이미 최대 인원이 승인되었습니다." },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: "이미 최대 인원이 승인되었습니다." }, { status: 409 });
     }
   }
 

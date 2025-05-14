@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
-import { Box, Tooltip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 export type TimelineItem = {
   id: string | number;
@@ -177,31 +177,29 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
         const height = laneHeight - barVerticalPadding * 2;
 
         return (
-          <Tooltip key={it.id} title={it.title}>
-            <Box
-              key={it.id}
-              sx={{
-                position: "absolute",
-                top,
-                left: `${sPct}%`,
-                width: `${wPct}%`,
-                height,
-                bgcolor: it.color,
-                borderRadius: 100,
-                px: 1.0,
-                display: "flex",
-                alignItems: "center",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                zIndex: 3,
-              }}
-            >
-              <Typography variant="caption" sx={{ color: "#fff", fontWeight: 600 }}>
-                {it.title}
-              </Typography>
-            </Box>
-          </Tooltip>
+          <Box
+            key={it.id}
+            sx={{
+              position: "absolute",
+              top,
+              left: `${sPct}%`,
+              width: `${wPct}%`,
+              height,
+              bgcolor: it.color,
+              borderRadius: 100,
+              px: 1.5,
+              display: "flex",
+              alignItems: "center",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              zIndex: 3,
+            }}
+          >
+            <Typography variant="caption" sx={{ color: "#fff", fontWeight: 600 }}>
+              {it.title}
+            </Typography>
+          </Box>
         );
       })}
 

@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/../lib/prismadb";
+import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../utils/authOptions";
-
 
 export async function GET() {
   const booths = await prisma.booth.findMany();
@@ -15,20 +14,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
   }
 
-  const {
-    name,
-    description,
-    where,
-    startAt,
-    endAt,
-    slotInterval,
-    capacity,
-  } = await req.json();
-  
-  const userID = await prisma.user.findUnique({
-    where: {studentNo: session.user!.email!.slice(0,6)},
-    select: {id:true}
-  })
+  const { name, description, where, startAt, endAt, slotInterval, capacity } = await req.json();
+
+  const userID = session.user?.id;
 
   const booth = await prisma.booth.create({
     data: {
@@ -39,7 +27,7 @@ export async function POST(req: Request) {
       endAt: new Date(endAt),
       slotInterval,
       capacity,
-      operatorId: userID.id,
+      operatorId: userID!,
     },
   });
 
