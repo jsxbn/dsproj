@@ -19,7 +19,7 @@ model User {
 
 model Booth {
   id           String   @id @default(uuid())
-  name         String
+  name         String   
   description  String?
   operatorId   String
   operator     User     @relation("OperatorBooths", fields: [operatorId], references: [id])
@@ -35,9 +35,9 @@ model Booth {
 
 model Application {
   id        String @id @default(uuid())
-  boothId   String
+  boothId   String 
   booth     Booth  @relation(fields: [boothId], references: [id], onDelete: Cascade)
-  userId    String
+  userId    String 
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   slotIndex Int // 0부터 시작: booth 운영시간/interval에 따라 세션 인덱스 결정
 
