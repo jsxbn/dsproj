@@ -1,5 +1,6 @@
-import { Typography } from "@mui/material";
-import { useSession } from "next-auth/react";
+"use client";
+import { Button, Typography } from "@mui/material";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 
 export default function NavigationBar() {
@@ -17,18 +18,16 @@ export default function NavigationBar() {
             alignItems: "center",
             // backgroundColor: "lightgray",
             borderRadius: 10,
+            gap: 10,
           }}
         >
           <Typography style={{ fontWeight: 400, fontSize: 16 }}>{session.data.user.name}</Typography>
-          <div
-            style={{
-              marginLeft: 10,
-              width: 40,
-              height: 40,
-              background: "linear-gradient(135deg,rgba(87, 199, 133, 1) 0%, rgba(237, 221, 83, 1) 100%)",
-              borderRadius: "100%",
-            }}
-          ></div>
+          <Link href="/mybooth">
+            <Button variant="outlined">관리자 페이지로 이동</Button>
+          </Link>
+          <Button color="secondary" onClick={() => signOut({})}>
+            로그아웃
+          </Button>
         </div>
       )}
     </div>
