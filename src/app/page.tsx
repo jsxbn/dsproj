@@ -3,7 +3,6 @@ import { Box, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 import SegmentedControl from "@/components/SegmentedControl";
 import { Option } from "@/components/SegmentedControl";
-import items from "./sampleData";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
