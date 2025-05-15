@@ -71,6 +71,7 @@ export default function AdminPage() {
           };
         })
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       alert("승인 중 오류: " + e.message);
     }
@@ -127,6 +128,7 @@ export default function AdminPage() {
       setEndAt("");
       setSlotInterval(15);
       setCapacity(1);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       alert("부스 생성 오류: " + e.message);
     } finally {
