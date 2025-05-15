@@ -4,8 +4,8 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../utils/authOptions";
 
-export async function DELETE(_req: Request, context: { params: { applicationId: string } }) {
-  const params = context.params;
+export async function DELETE(_req: Request, context: { params: Promise<{ applicationId: string }> }) {
+  const params = await context.params;
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
@@ -26,8 +26,8 @@ export async function DELETE(_req: Request, context: { params: { applicationId: 
   return NextResponse.json({ success: true });
 }
 
-export async function PATCH(req: Request, context: { params: { applicationId: string } }) {
-  const params = context.params;
+export async function PATCH(req: Request, context: { params: Promise<{ applicationId: string }> }) {
+  const params = await context.params;
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
