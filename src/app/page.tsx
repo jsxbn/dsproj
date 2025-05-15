@@ -1,5 +1,5 @@
 "use client";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 import SegmentedControl from "@/components/SegmentedControl";
 import { Option } from "@/components/SegmentedControl";
@@ -8,23 +8,9 @@ import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import ApplicationsViewer from "@/components/ApplicationsViewer";
+import { User, Booth, Application } from "./utils/schemaTypes";
 
 // const viridis = ["#210F37", "#4F1C51", "#A55B4B", "#DCA06D"];
-
-type Booth = {
-  id: string;
-  name: string;
-  // 추가적으로 필요한 booth 모델의 필드들
-};
-
-type Application = {
-  id: string;
-  boothId: string;
-  userId: string;
-  status: string;
-  booth: Booth;
-  // application 모델에 맞게 필드 추가
-};
 
 const TimeLineViewer = dynamic(() => import("../components/TimeLineViewer"), {
   ssr: false,
@@ -35,7 +21,8 @@ export default function MyApp() {
   const router = useRouter();
   const [view, setView] = useState<string>("2024-11-01");
   const [loadingData, setLoadingData] = useState(true);
-  const [Applications, setApplications] = useState<Application[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [booths, setBooths] = useState<Booth[]>([]);
 
   useEffect(() => {
     if (session.status === "unauthenticated") {
@@ -49,7 +36,26 @@ export default function MyApp() {
       fetch(`/api/users/${session.data.user.id}/applications`)
         .then((res) => res.json())
         .then((data) => {
-          setApplications(data);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const fixed = data.map((b: any) => ({
+            ...b,
+            createdAt: new Date(b.createdAt),
+          }));
+          setApplications(fixed);
+          console.log("데이터데이터!!!", data);
+        })
+        .finally(() => setLoadingData(false));
+      fetch(`/api/booths`)
+        .then((res) => res.json())
+        .then((data) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const fixed = data.map((b: any) => ({
+            ...b,
+            startAt: new Date(b.startAt),
+            endAt: new Date(b.endAt),
+            createdAt: new Date(b.createdAt),
+          }));
+          setBooths(fixed);
           console.log("데이터데이터!!!", data);
         })
         .finally(() => setLoadingData(false));
@@ -89,7 +95,7 @@ export default function MyApp() {
 
   return (
     <Box px={2} maxWidth={3000}>
-      <ApplicationsViewer />
+      {/* <ApplicationsViewer /> */}
       <Typography variant="h5" fontWeight={700} style={{ marginBottom: 10 }}>
         SAC 전체일정
       </Typography>
@@ -107,7 +113,7 @@ export default function MyApp() {
         <SegmentedControl options={options} value={view} onChange={setView} />
 
         <TimeLineViewer
-          items={items}
+          items={booths}
           // 하루 전체 00:00 ~ 24:00 고정
           rangeStart={getSelectedDay(view)}
           rangeEnd={getTomorrow(view)}
@@ -123,9 +129,10 @@ export default function MyApp() {
           nowLineColor="#E91E63"
           // marker 라인 색상
           markerLineColor="#CCC"
+          applications={applications}
         />
       </Box>
-      <Button>click here</Button>
+      <ApplicationsViewer applications={applications}></ApplicationsViewer>
     </Box>
   );
 }

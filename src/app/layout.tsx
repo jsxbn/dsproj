@@ -37,6 +37,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 }}
               />
               <NavigationBar></NavigationBar>
+              <div id="modal-root"></div>
               <Suspense>{children}</Suspense>
             </ThemeProvider>
           </AppRouterCacheProvider>

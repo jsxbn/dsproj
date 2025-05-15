@@ -2,19 +2,13 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
-import { Box, Typography } from "@mui/material";
-
-export type TimelineItem = {
-  id: string | number;
-  title: string;
-  where: string;
-  start: Date;
-  end: Date;
-  color: string;
-};
+import { Box, Tooltip, Typography } from "@mui/material";
+// ▶️ 실제 프로젝트 경로에 맞게 import 경로를 조정하세요.
+import { Application, Booth } from "@/app/utils/schemaTypes";
+import BoothModal from "./BoothModal";
 
 export interface TimelineViewerProps {
-  items: TimelineItem[];
+  items: Booth[]; // ⬅️ TimelineItem[] → Booth[]
   laneHeight?: number;
   barVerticalPadding?: number;
   nowLineColor?: string;
@@ -25,8 +19,10 @@ export interface TimelineViewerProps {
   markerLineColor?: string;
   hideEdgeMarkers?: boolean;
   showNowBadge?: boolean;
-  /** now 라인/뱃지 갱신 주기(ms) */
   nowUpdateInterval?: number;
+  itemColor?: string;
+  itemHoverColor?: string;
+  applications: Application[];
 }
 
 const TimelineViewer: React.FC<TimelineViewerProps> = ({
@@ -41,63 +37,70 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
   markerLineColor = "#CCC",
   hideEdgeMarkers = true,
   showNowBadge = true,
-  nowUpdateInterval = 6000, // 기본 1분
+  nowUpdateInterval = 60000,
+  itemColor = "#9e9e9e",
+  itemHoverColor = "#616161",
+  applications,
 }) => {
-  // 0) 실시간으로 바뀌는 now 시간
+  // 0) “Now” 라인용 현재 시각 갱신
   const [currentTime, setCurrentTime] = useState(() => Date.now());
-
   useEffect(() => {
     const id = setInterval(() => setCurrentTime(Date.now()), nowUpdateInterval);
     return () => clearInterval(id);
   }, [nowUpdateInterval]);
 
-  // 1) items 로부터 min/max 계산
+  // 1) items 로부터 전체 min/max 계산
   const [computedMin, computedMax] = useMemo(() => {
-    if (items.length === 0) return [Date.now(), Date.now()] as const;
-    const all = items.flatMap((it) => [it.start.getTime(), it.end.getTime()]);
+    if (items.length === 0) {
+      const now = Date.now();
+      return [now, now] as const;
+    }
+    const all = items.flatMap((it) => [it.startAt.getTime(), it.endAt.getTime()]);
     return [Math.min(...all), Math.max(...all)] as const;
   }, [items]);
 
-  // 2) prop으로 고정된 range 가 있으면 사용
+  // 2) 실제 타임라인 범위 결정
   const startMs = (rangeStart ?? new Date(computedMin)).getTime();
   const endMs = (rangeEnd ?? new Date(computedMax)).getTime();
   const totalRange = endMs - startMs;
 
-  // 3) marker 계산
+  // 3) 시간 마커 생성
   const markers = useMemo(() => {
     if (!markerIntervalHours || markerIntervalHours <= 0) return [];
     const step = markerIntervalHours * 3600 * 1000;
-    const arr: { time: number; label: string }[] = [];
+    const out: { time: number; label: string }[] = [];
     for (let t = startMs; t <= endMs; t += step) {
       const d = new Date(t);
-      const label = d.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
+      out.push({
+        time: t,
+        label: d.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
       });
-      arr.push({ time: t, label });
     }
-    return arr;
+    return out;
   }, [startMs, endMs, markerIntervalHours]);
 
-  // 4) 양 끝단 마커 제거
+  // 4) 양 끝 마커 숨기기 옵션
   const visibleMarkers = useMemo(() => {
     if (!hideEdgeMarkers) return markers;
     return markers.filter((m) => m.time > startMs && m.time < endMs);
   }, [markers, hideEdgeMarkers, startMs, endMs]);
 
-  // 5) First-Fit lane 할당
+  // 5) First-Fit 레인 할당
   const { laneMap, lanesCount } = useMemo(() => {
-    type Ev = { id: string | number; s: number; e: number };
+    type Ev = { id: string; s: number; e: number };
     const evs: Ev[] = items
       .map((it) => ({
         id: it.id,
-        s: it.start.getTime(),
-        e: it.end.getTime(),
+        s: it.startAt.getTime(),
+        e: it.endAt.getTime(),
       }))
       .sort((a, b) => a.s - b.s);
 
     const lanesEnd: number[] = [];
-    const laneMap: Record<string | number, number> = {};
+    const laneMap: Record<string, number> = {};
 
     evs.forEach((ev) => {
       let idx = lanesEnd.findIndex((end) => end <= ev.s);
@@ -113,136 +116,154 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
     return { laneMap, lanesCount: lanesEnd.length };
   }, [items]);
 
-  // 6) 렌더링
   const containerHeight = Math.max(markerLabelHeight + lanesCount * laneHeight, 150);
   const nowPct = ((currentTime - startMs) / totalRange) * 100;
 
+  // 6) mounted: **한 번만** false→true 토글 (초기 expand 애니메이션)
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const id = window.setTimeout(() => setMounted(true), 50);
+    return () => clearTimeout(id);
+  }, []);
+
+  // 7) 모달용 selectedItem
+  const [selectedItem, setSelectedItem] = useState<Booth | null>(null);
+
   return (
-    //wrapper
-    <Box
-      sx={{
-        position: "relative",
-        width: "100%",
-        height: containerHeight,
-        // border: "1px solid #EEE",
-        overflow: "hidden",
-      }}
-    >
-      {/* 마커 라인 */}
-      {visibleMarkers.map((m) => {
-        const left = ((m.time - startMs) / totalRange) * 100;
-        return (
-          <Box
-            key={"line_" + m.time}
-            sx={{
-              position: "absolute",
-              top: markerLabelHeight,
-              bottom: 0,
-              left: `${left}%`,
-              borderLeft: `1px solid ${markerLineColor}`,
-              zIndex: 1,
-            }}
-          />
-        );
-      })}
-
-      {/* 마커 라벨 */}
-      {visibleMarkers.map((m) => {
-        const left = ((m.time - startMs) / totalRange) * 100;
-        return (
-          <Typography
-            key={"lbl_" + m.time}
-            variant="caption"
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: `${left}%`,
-              transform: "translateX(-50%)",
-              zIndex: 2,
-              userSelect: "none",
-            }}
-          >
-            {m.label}
-          </Typography>
-        );
-      })}
-
-      {/* 이벤트 바 */}
-      {items.map((it) => {
-        const sPct = ((it.start.getTime() - startMs) / totalRange) * 100;
-        const ePct = ((it.end.getTime() - startMs) / totalRange) * 100;
-        const wPct = ePct - sPct;
-        const lane = laneMap[it.id];
-        const top = markerLabelHeight + lane * laneHeight + barVerticalPadding;
-        const height = laneHeight - barVerticalPadding * 2;
-
-        return (
-          <Box
-            key={it.id}
-            sx={{
-              position: "absolute",
-              top,
-              left: `${sPct}%`,
-              width: `${wPct}%`,
-              height,
-              bgcolor: it.color,
-              borderRadius: 100,
-              px: 1.5,
-              display: "flex",
-              alignItems: "center",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              zIndex: 3,
-            }}
-          >
-            <Typography variant="caption" sx={{ color: "#fff", fontWeight: 600 }}>
-              {it.title}
-            </Typography>
-          </Box>
-        );
-      })}
-
-      {/* “Now” 라인 */}
+    <>
       <Box
         sx={{
-          position: "absolute",
-          top: markerLabelHeight,
-          bottom: 0,
-          left: `${nowPct}%`,
-          borderLeft: `2px solid ${nowLineColor}`,
-          pointerEvents: "none",
-          zIndex: 4,
+          position: "relative",
+          width: "100%",
+          height: containerHeight,
+          overflow: "hidden",
         }}
-      />
+      >
+        {/* 시간 마커 라인 */}
+        {visibleMarkers.map((m) => {
+          const left = ((m.time - startMs) / totalRange) * 100;
+          return (
+            <Box
+              key={"line_" + m.time}
+              sx={{
+                position: "absolute",
+                top: markerLabelHeight,
+                bottom: 0,
+                left: `${left}%`,
+                borderLeft: `1px solid ${markerLineColor}`,
+                zIndex: 1,
+              }}
+            />
+          );
+        })}
 
-      {/* “Now” 뱃지 */}
-      {showNowBadge && (
+        {/* 시간 마커 레이블 */}
+        {visibleMarkers.map((m) => {
+          const left = ((m.time - startMs) / totalRange) * 100;
+          return (
+            <Typography
+              key={"lbl_" + m.time}
+              variant="caption"
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: `${left}%`,
+                transform: "translateX(-50%)",
+                zIndex: 2,
+                userSelect: "none",
+              }}
+            >
+              {m.label}
+            </Typography>
+          );
+        })}
+
+        {/* 이벤트 바 */}
+        {items.map((it) => {
+          const sPct = ((it.startAt.getTime() - startMs) / totalRange) * 100;
+          const ePct = ((it.endAt.getTime() - startMs) / totalRange) * 100;
+          const wPct = ePct - sPct;
+          const lane = laneMap[it.id];
+          const top = markerLabelHeight + lane * laneHeight + barVerticalPadding;
+          const height = laneHeight - barVerticalPadding * 2;
+
+          return (
+            <Tooltip key={it.id} title={it.name}>
+              <Box
+                onClick={() => setSelectedItem(it)}
+                sx={{
+                  position: "absolute",
+                  top,
+                  left: `${sPct}%`,
+                  width: mounted ? `${wPct}%` : "0%",
+                  height,
+                  boxSizing: "border-box",
+                  bgcolor: itemColor,
+                  borderRadius: 100,
+                  px: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  cursor: "pointer",
+                  zIndex: 3,
+                  transition: "left 0.8s ease, width 0.8s ease",
+                  "&:hover": { bgcolor: itemHoverColor },
+                }}
+              >
+                <Typography variant="caption" sx={{ color: "#fff", fontWeight: 600 }}>
+                  {it.name}
+                </Typography>
+              </Box>
+            </Tooltip>
+          );
+        })}
+
+        {/* “Now” 라인 */}
         <Box
           sx={{
             position: "absolute",
-            top: markerLabelHeight / 2,
+            top: markerLabelHeight,
+            bottom: 0,
             left: `${nowPct}%`,
-            transform: "translate(-50%, -50%)",
-            bgcolor: nowLineColor,
-            color: "#fff",
-            px: 1,
-            py: 0.25,
-            borderRadius: 1,
-            fontSize: "0.75rem",
-            fontWeight: 600,
-            zIndex: 5,
+            borderLeft: `2px solid ${nowLineColor}`,
             pointerEvents: "none",
-            userSelect: "none",
+            zIndex: 4,
           }}
-        >
-          {new Date(currentTime).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </Box>
-      )}
-    </Box>
+        />
+
+        {/* “Now” 뱃지 */}
+        {showNowBadge && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: markerLabelHeight / 2,
+              left: `${nowPct}%`,
+              transform: "translate(-50%, -50%)",
+              bgcolor: nowLineColor,
+              color: "#fff",
+              px: 1,
+              py: 0.25,
+              borderRadius: 1,
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              zIndex: 5,
+              pointerEvents: "none",
+              userSelect: "none",
+            }}
+          >
+            {new Date(currentTime).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </Box>
+        )}
+
+        {/* 상세 모달 */}
+      </Box>
+      <BoothModal userApplications={applications} booth={selectedItem} onClose={() => setSelectedItem(null)} />
+    </>
   );
 };
 

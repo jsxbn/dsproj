@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../utils/authOptions";
 
 export async function GET() {
-  const booths = await prisma.booth.findMany();
+  const booths = await prisma.booth.findMany({ include: { applications: true } });
   return NextResponse.json(booths);
 }
 
