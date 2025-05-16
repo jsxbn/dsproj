@@ -3,7 +3,6 @@
 import React, { useEffect, useState, FormEvent } from "react";
 import { useSession } from "next-auth/react";
 import type { Booth } from "@/app/utils/schemaTypes";
-import prisma from "@/lib/prisma";
 import {
   Box,
   Typography,
@@ -124,6 +123,7 @@ export default function AdminPage() {
     }
   };
 
+  // === 수정된 부스 생성 함수 ===
   const handleCreateBooth = async (e: FormEvent) => {
     e.preventDefault();
     if (password !== ADMIN_PASSWORD) {
@@ -132,10 +132,22 @@ export default function AdminPage() {
     }
     setIsCreating(true);
     try {
+      // 1) datetime-local ("YYYY-MM-DDTHH:mm") → Date(로컬) → ISO(UTC) 문자열
+      const startAtIso = new Date(startAt).toISOString();
+      const endAtIso = new Date(endAt).toISOString();
+
       const res = await fetch("/api/booths", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, where, startAt, endAt, slotInterval, capacity }),
+        body: JSON.stringify({
+          name,
+          description,
+          where,
+          startAt: startAtIso,
+          endAt: endAtIso,
+          slotInterval,
+          capacity,
+        }),
       });
       if (!res.ok) throw new Error((await res.json()).error || "생성 실패");
       const newBooth: Booth = await res.json();
