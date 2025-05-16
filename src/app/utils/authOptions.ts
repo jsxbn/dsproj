@@ -79,10 +79,10 @@ export const authOptions: NextAuthOptions = {
     },
   },
 
-  ...(isProd && {
-    pages: {
-      signIn: "/login",
-      error: "/login",
-    },
-  }),
+  // ...(isProd && {
+  //   pages: {
+  //     signIn: "/login",
+  //     error: "/login",
+  //   },
+  // }),
 };
