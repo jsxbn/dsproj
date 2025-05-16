@@ -34,12 +34,12 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
   rangeEnd,
   markerIntervalHours = 6,
   markerLabelHeight = 24,
-  markerLineColor = "#CCC",
+  markerLineColor = "#EEE",
   hideEdgeMarkers = true,
   showNowBadge = true,
   nowUpdateInterval = 60000,
-  itemColor = "#9e9e9e",
-  itemHoverColor = "#616161",
+  itemColor = "#edf5fb",
+  itemHoverColor = "#E1EAF9",
   applications,
 }) => {
   // 0) “Now” 라인용 현재 시각 갱신
@@ -116,7 +116,7 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
     return { laneMap, lanesCount: lanesEnd.length };
   }, [items]);
 
-  const containerHeight = Math.max(markerLabelHeight + lanesCount * laneHeight, 150);
+  const containerHeight = Math.max(markerLabelHeight + lanesCount * laneHeight, 250);
   const nowPct = ((currentTime - startMs) / totalRange) * 100;
 
   // 6) mounted: **한 번만** false→true 토글 (초기 expand 애니메이션)
@@ -150,7 +150,7 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
                 top: markerLabelHeight,
                 bottom: 0,
                 left: `${left}%`,
-                borderLeft: `1px solid ${markerLineColor}`,
+                borderLeft: `2px solid ${markerLineColor}`,
                 zIndex: 1,
               }}
             />
@@ -171,6 +171,7 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
                 transform: "translateX(-50%)",
                 zIndex: 2,
                 userSelect: "none",
+                fontWeight: 500,
               }}
             >
               {m.label}
@@ -188,35 +189,34 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
           const height = laneHeight - barVerticalPadding * 2;
 
           return (
-            <Tooltip key={it.id} title={it.name}>
-              <Box
-                onClick={() => setSelectedItem(it)}
-                sx={{
-                  position: "absolute",
-                  top,
-                  left: `${sPct}%`,
-                  width: mounted ? `${wPct}%` : "0%",
-                  height,
-                  boxSizing: "border-box",
-                  bgcolor: itemColor,
-                  borderRadius: 100,
-                  px: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  cursor: "pointer",
-                  zIndex: 3,
-                  transition: "left 0.8s ease, width 0.8s ease",
-                  "&:hover": { bgcolor: itemHoverColor },
-                }}
-              >
-                <Typography variant="caption" sx={{ color: "#fff", fontWeight: 600 }}>
-                  {it.name}
-                </Typography>
-              </Box>
-            </Tooltip>
+            <Box
+              key={it.id}
+              onClick={() => setSelectedItem(it)}
+              sx={{
+                position: "absolute",
+                top,
+                left: `${sPct}%`,
+                width: mounted ? `${wPct}%` : "0%",
+                height,
+                boxSizing: "border-box",
+                bgcolor: itemColor,
+                borderRadius: 2,
+                px: 1,
+                display: "flex",
+                alignItems: "center",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                cursor: "pointer",
+                zIndex: 3,
+                transition: "left 0.8s ease, width 0.8s ease, background-color 0.5s",
+                "&:hover": { bgcolor: itemHoverColor },
+              }}
+            >
+              <Typography variant="caption" sx={{ color: "#17171B", fontWeight: 600 }}>
+                {it.name}
+              </Typography>
+            </Box>
           );
         })}
 

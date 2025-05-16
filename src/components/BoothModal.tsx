@@ -6,6 +6,7 @@ import Portal from "./Portal";
 import styles from "./BoothModal.module.css";
 import { FormControl, InputLabel, Select, MenuItem, Button, CircularProgress, Typography } from "@mui/material";
 import type { Booth, Application } from "@/app/utils/schemaTypes";
+import { useSession } from "next-auth/react";
 
 interface BoothModalProps {
   booth: Booth | null;
@@ -15,6 +16,7 @@ interface BoothModalProps {
 }
 
 export default function BoothModal({ booth, userApplications, onClose }: BoothModalProps) {
+  const { data: session } = useSession();
   // ─── 1) 슬롯별 수락된 신청 count ─────────────────
   const [slotCounts, setSlotCounts] = useState<Record<number, number>>({});
   useEffect(() => {
@@ -32,11 +34,15 @@ export default function BoothModal({ booth, userApplications, onClose }: BoothMo
       .catch(() => setSlotCounts({}));
   }, [booth]);
 
-  // ─── 2) 이미 이 부스에 수락된 내 신청이 있는지 ──────────
+  // ─── 2) 이미 이 부스에 수락된 내 신청이 있는지, 내가 관리자는 아닌지 ──────────
   const hasAppliedToThisBooth = useMemo(() => {
     if (!booth) return false;
     return userApplications.some((app) => app.boothId === booth.id);
   }, [userApplications, booth]);
+  const amIoperator = useMemo(() => {
+    if (!booth) return false;
+    return booth.operatorId === session!.user!.id;
+  }, [booth, session]);
 
   // ─── 3) 이 부스의 세션(슬롯) 리스트 생성 ────────────
   const slots = useMemo(() => {
@@ -153,7 +159,7 @@ export default function BoothModal({ booth, userApplications, onClose }: BoothMo
               })}
             </Typography>
             <Typography gutterBottom>
-              <strong>수용량:</strong> {booth.capacity}명
+              <strong>슬롯 인원:</strong> {booth.capacity}명
             </Typography>
 
             {/* 이미 이 부스에 예약된 경우 */}
@@ -162,9 +168,14 @@ export default function BoothModal({ booth, userApplications, onClose }: BoothMo
                 이미 이 부스에 신청했습니다.
               </Typography>
             )}
+            {amIoperator && (
+              <Typography color="error" gutterBottom>
+                운영자는 자신의 부스에 신청할 수 없습니다.
+              </Typography>
+            )}
 
             {/* 세션 드롭다운 */}
-            <FormControl fullWidth margin="normal" disabled={hasAppliedToThisBooth}>
+            <FormControl fullWidth margin="normal" disabled={hasAppliedToThisBooth || amIoperator}>
               <InputLabel id="slot-select-label">세션 선택</InputLabel>
               <Select
                 labelId="slot-select-label"

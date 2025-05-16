@@ -82,7 +82,11 @@ export default function MyApp() {
   }
 
   if (loadingData) {
-    return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>북 </div>;
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
+        데이터 로딩중{" "}
+      </div>
+    );
   }
 
   const options: Option[] = [
@@ -100,17 +104,17 @@ export default function MyApp() {
       </Typography>
       <Box
         sx={{
-          py: 2,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           border: "1px solid #EEE",
-          padding: 1,
-          borderRadius: 5,
+          px: 2,
+          py: 2,
+          borderRadius: 3,
         }}
       >
         <SegmentedControl options={options} value={view} onChange={setView} />
-
+        <div style={{ height: 4 }} />
         <TimeLineViewer
           items={booths}
           // 하루 전체 00:00 ~ 24:00 고정
@@ -127,7 +131,7 @@ export default function MyApp() {
           // Now 라인 색상
           nowLineColor="#E91E63"
           // marker 라인 색상
-          markerLineColor="#CCC"
+          // markerLineColor="#CCC"
           applications={applications}
         />
       </Box>

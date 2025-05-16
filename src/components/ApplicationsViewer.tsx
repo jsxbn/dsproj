@@ -4,12 +4,14 @@
 import React, { useEffect, useState } from "react";
 import type { Application } from "@/app/utils/schemaTypes";
 import { Divider, Typography, Box, Button, CircularProgress } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 interface ApplicationsViewerProps {
   applications: Application[];
 }
 
 export default function ApplicationsViewer({ applications }: ApplicationsViewerProps) {
+  const router = useRouter();
   // 1) 로컬 상태로 복사
   const [appList, setAppList] = useState<Application[]>(applications);
   useEffect(() => {
@@ -31,6 +33,7 @@ export default function ApplicationsViewer({ applications }: ApplicationsViewerP
       if (!res.ok) throw new Error(body.error || "취소 실패");
       // 로컬 리스트에서 제거
       setAppList((list) => list.filter((a) => a.id !== appId));
+      router.refresh();
     } catch (err: any) {
       alert(err.message);
     } finally {

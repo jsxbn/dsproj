@@ -2,15 +2,44 @@
 
 import React, { useEffect, useState, FormEvent } from "react";
 import { useSession } from "next-auth/react";
-import type { Booth, Application } from "@/app/utils/schemaTypes";
-import { Box, Typography, TextField, Button, Paper, Divider, CircularProgress } from "@mui/material";
+import type { Booth } from "@/app/utils/schemaTypes";
+import prisma from "@/lib/prisma";
+import {
+  Box,
+  Typography,
+  Button,
+  Paper,
+  Divider,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  TextField,
+} from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+
+const ADMIN_PASSWORD = "sachedule";
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
   const [booths, setBooths] = useState<Booth[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 신규 부스 form state
+  // Modal for booth creation
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  // Form state
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [where, setWhere] = useState("");
@@ -18,16 +47,15 @@ export default function AdminPage() {
   const [endAt, setEndAt] = useState("");
   const [slotInterval, setSlotInterval] = useState<number>(15);
   const [capacity, setCapacity] = useState<number>(1);
+  const [password, setPassword] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
-  // 1) 로그인 확인 & 부스 fetch
+  // Fetch booths once authenticated
   useEffect(() => {
     if (status !== "authenticated") return;
     fetch("/api/booths")
-      .then((r) => r.json())
-      .then((data: Booth[]) => {
-        setBooths(data);
-      })
+      .then((res) => res.json())
+      .then((data: Booth[]) => setBooths(data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [status]);
@@ -48,11 +76,9 @@ export default function AdminPage() {
   }
 
   const userId = session.user?.id ?? "";
-
-  // 자신이 운영하는 부스만 필터
   const myBooths = booths.filter((b) => b.operatorId === userId);
 
-  // 2) 신청 수락
+  // Handlers
   const handleAccept = async (boothId: string, appId: string) => {
     try {
       const res = await fetch(`/api/applications/${appId}`, {
@@ -61,23 +87,21 @@ export default function AdminPage() {
         body: JSON.stringify({ isAccepted: true }),
       });
       if (!res.ok) throw new Error(await res.text());
-      // 클라이언트 state 업데이트
       setBooths((prev) =>
-        prev.map((b) => {
-          if (b.id !== boothId) return b;
-          return {
-            ...b,
-            applications: b.applications!.map((a) => (a.id === appId ? { ...a, isAccepted: true } : a)),
-          };
-        })
+        prev.map((b) =>
+          b.id !== boothId
+            ? b
+            : {
+                ...b,
+                applications: b.applications!.map((a) => (a.id === appId ? { ...a, isAccepted: true } : a)),
+              }
+        )
       );
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       alert("승인 중 오류: " + e.message);
     }
   };
 
-  // 3) 신청 거절(삭제)
   const handleReject = async (boothId: string, appId: string) => {
     if (!confirm("정말 거절하시겠습니까?")) return;
     try {
@@ -86,41 +110,37 @@ export default function AdminPage() {
       });
       if (!res.ok) throw new Error(await res.text());
       setBooths((prev) =>
-        prev.map((b) => {
-          if (b.id !== boothId) return b;
-          return {
-            ...b,
-            applications: b.applications!.filter((a) => a.id !== appId),
-          };
-        })
+        prev.map((b) =>
+          b.id !== boothId
+            ? b
+            : {
+                ...b,
+                applications: b.applications!.filter((a) => a.id !== appId),
+              }
+        )
       );
     } catch (e: any) {
       alert("거절 중 오류: " + e.message);
     }
   };
 
-  // 4) 신규 부스 생성
   const handleCreateBooth = async (e: FormEvent) => {
     e.preventDefault();
+    if (password !== ADMIN_PASSWORD) {
+      alert("비밀번호가 올바르지 않습니다.");
+      return;
+    }
     setIsCreating(true);
     try {
       const res = await fetch("/api/booths", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          description,
-          where,
-          startAt,
-          endAt,
-          slotInterval,
-          capacity,
-        }),
+        body: JSON.stringify({ name, description, where, startAt, endAt, slotInterval, capacity }),
       });
       if (!res.ok) throw new Error((await res.json()).error || "생성 실패");
       const newBooth: Booth = await res.json();
       setBooths((prev) => [...prev, { ...newBooth, applications: [] }]);
-      // 폼 클리어
+      handleClose();
       setName("");
       setDescription("");
       setWhere("");
@@ -128,7 +148,7 @@ export default function AdminPage() {
       setEndAt("");
       setSlotInterval(15);
       setCapacity(1);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setPassword("");
     } catch (e: any) {
       alert("부스 생성 오류: " + e.message);
     } finally {
@@ -141,138 +161,178 @@ export default function AdminPage() {
       <Typography variant="h4" gutterBottom>
         관리 페이지
       </Typography>
-
-      {/* 신규 부스 생성 폼 */}
-      <Box
-        component="form"
-        onSubmit={handleCreateBooth}
-        mb={4}
-        display="grid"
-        gridTemplateColumns={{ xs: "1fr", md: "1fr 1fr" }}
-        gap={2}
+      <Button
+        variant="contained"
+        onClick={handleOpen}
+        sx={{ backgroundColor: "black", color: "white", mb: 3, "&:hover": { backgroundColor: "#333" } }}
       >
-        <TextField required label="부스 이름" value={name} onChange={(e) => setName(e.target.value)} />
-        <TextField label="설명" value={description} onChange={(e) => setDescription(e.target.value)} />
-        <TextField required label="위치" value={where} onChange={(e) => setWhere(e.target.value)} />
-        <TextField
-          required
-          label="시작시간"
-          type="datetime-local"
-          InputLabelProps={{ shrink: true }}
-          value={startAt}
-          onChange={(e) => setStartAt(e.target.value)}
-        />
-        <TextField
-          required
-          label="종료시간"
-          type="datetime-local"
-          InputLabelProps={{ shrink: true }}
-          value={endAt}
-          onChange={(e) => setEndAt(e.target.value)}
-        />
-        <TextField
-          required
-          label="세션 길이(분)"
-          type="number"
-          value={slotInterval}
-          onChange={(e) => setSlotInterval(Number(e.target.value))}
-        />
-        <TextField
-          required
-          label="수용량"
-          type="number"
-          value={capacity}
-          onChange={(e) => setCapacity(Number(e.target.value))}
-        />
-        <Box display="flex" alignItems="center">
-          <Button type="submit" variant="contained" disabled={isCreating} fullWidth>
-            {isCreating ? <CircularProgress size={20} color="inherit" /> : "새 부스 생성"}
-          </Button>
+        새 부스 생성
+      </Button>
+
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+        <DialogTitle>신규 부스 생성</DialogTitle>
+        <Box component="form" onSubmit={handleCreateBooth}>
+          <DialogContent dividers>
+            <TextField
+              required
+              fullWidth
+              margin="dense"
+              label="부스 이름"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <TextField
+              fullWidth
+              margin="dense"
+              label="설명"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <TextField
+              required
+              fullWidth
+              margin="dense"
+              label="위치"
+              value={where}
+              onChange={(e) => setWhere(e.target.value)}
+            />
+            <TextField
+              required
+              fullWidth
+              margin="dense"
+              label="시작시간"
+              type="datetime-local"
+              InputLabelProps={{ shrink: true }}
+              value={startAt}
+              onChange={(e) => setStartAt(e.target.value)}
+            />
+            <TextField
+              required
+              fullWidth
+              margin="dense"
+              label="종료시간"
+              type="datetime-local"
+              InputLabelProps={{ shrink: true }}
+              value={endAt}
+              onChange={(e) => setEndAt(e.target.value)}
+            />
+            <TextField
+              required
+              fullWidth
+              margin="dense"
+              label="세션 길이(분)"
+              type="number"
+              value={slotInterval}
+              onChange={(e) => setSlotInterval(Number(e.target.value))}
+            />
+            <TextField
+              required
+              fullWidth
+              margin="dense"
+              label="수용인원원"
+              type="number"
+              value={capacity}
+              onChange={(e) => setCapacity(Number(e.target.value))}
+            />
+            <TextField
+              required
+              fullWidth
+              margin="dense"
+              label="관리 비밀번호"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button
+              variant="outlined"
+              onClick={handleClose}
+              sx={{
+                backgroundColor: "white",
+                color: "black",
+                border: "1px solid black",
+                "&:hover": { backgroundColor: "#f0f0f0" },
+              }}
+            >
+              취소
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isCreating}
+              sx={{ backgroundColor: "black", color: "white", "&:hover": { backgroundColor: "#333" } }}
+            >
+              {isCreating ? <CircularProgress size={20} sx={{ color: "white" }} /> : "생성"}
+            </Button>
+          </DialogActions>
         </Box>
-      </Box>
+      </Dialog>
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* 자신이 운영하는 부스 리스트 */}
-      {myBooths.length === 0 ? (
-        <Typography>아직 운영 중인 부스가 없습니다.</Typography>
-      ) : (
-        myBooths.map((booth) => {
-          const pending = booth.applications!.filter((a) => !a.isAccepted);
-          const accepted = booth.applications!.filter((a) => a.isAccepted);
-          return (
-            <Paper key={booth.id} sx={{ p: 2, mb: 3 }} elevation={2}>
-              <Typography variant="h6">{booth.name}</Typography>
-              <Typography>위치: {booth.where}</Typography>
-              <Typography>
-                시간: {new Date(booth.startAt).toLocaleString()} ~ {new Date(booth.endAt).toLocaleString()}
-              </Typography>
-              <Typography>
-                세션 길이: {booth.slotInterval}분 / 수용량: {booth.capacity}명
-              </Typography>
-
-              <Divider sx={{ my: 2 }} />
-
-              <Typography variant="subtitle1">⏳ 대기중</Typography>
-              {pending.length === 0 && (
-                <Typography color="text.secondary" mb={1}>
-                  대기중인 신청이 없습니다.
-                </Typography>
-              )}
-              {pending.map((app) => (
-                <Box key={app.id} display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                  <Box>
-                    <Typography>
-                      {app.user?.name || app.userId} (Slot {app.slotIndex})
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {new Date(app.createdAt).toLocaleString()}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      onClick={() => handleAccept(booth.id, app.id)}
-                      sx={{ mr: 1 }}
-                    >
-                      수락
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      color="error"
-                      onClick={() => handleReject(booth.id, app.id)}
-                    >
-                      거절
-                    </Button>
-                  </Box>
-                </Box>
-              ))}
-
-              <Divider sx={{ my: 2 }} />
-
-              <Typography variant="subtitle1">✔️ 수락됨</Typography>
-              {accepted.length === 0 && <Typography color="text.secondary">수락된 신청이 없습니다.</Typography>}
-              {accepted.map((app) => (
-                <Box key={app.id} display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                  <Box>
-                    <Typography>
-                      {app.user?.name || app.userId} (Slot {app.slotIndex})
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {new Date(app.createdAt).toLocaleString()}
-                    </Typography>
-                  </Box>
-                  <Button size="small" color="error" onClick={() => handleReject(booth.id, app.id)}>
-                    취소
-                  </Button>
-                </Box>
-              ))}
-            </Paper>
-          );
-        })
-      )}
+      {myBooths.map((booth) => {
+        const start = new Date(booth.startAt).getTime();
+        const intervalMs = booth.slotInterval * 60000;
+        const totalSlots = Math.ceil((new Date(booth.endAt).getTime() - start) / intervalMs);
+        const slots = Array.from({ length: totalSlots }, (_, i) => i);
+        return (
+          <Paper key={booth.id} sx={{ p: 2, mb: 3 }} elevation={2}>
+            <Typography variant="h6">{booth.name}</Typography>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>시간대</TableCell>
+                    <TableCell>수락된 학생 번호</TableCell>
+                    <TableCell>대기 중 학생 번호</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {slots.map((idx) => {
+                    const slotStart = new Date(start + idx * intervalMs);
+                    const slotEnd = new Date(slotStart.getTime() + intervalMs);
+                    const twoDigit = (n: number) => String(n).padStart(2, "0");
+                    const label = `${twoDigit(slotStart.getHours())}:${twoDigit(slotStart.getMinutes())} - ${twoDigit(
+                      slotEnd.getHours()
+                    )}:${twoDigit(slotEnd.getMinutes())}`;
+                    const accepted = booth.applications?.filter((a) => a.slotIndex === idx && a.isAccepted) || [];
+                    const pending = booth.applications?.filter((a) => a.slotIndex === idx && !a.isAccepted) || [];
+                    return (
+                      <TableRow key={idx}>
+                        <TableCell>{label}</TableCell>
+                        <TableCell>
+                          {accepted.map((a) => (
+                            <Box key={a.id} display="inline-flex" alignItems="center" mr={1}>
+                              <Typography mr={0.5}>{a.user!.studentNo}</Typography>
+                              <IconButton size="small" onClick={() => handleReject(booth.id, a.id)}>
+                                <CloseIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          ))}
+                        </TableCell>
+                        <TableCell>
+                          {pending.map((a) => (
+                            <Box key={a.id} display="inline-flex" alignItems="center" mr={1}>
+                              <Typography mr={0.5}>{a.user!.studentNo}</Typography>
+                              <IconButton size="small" onClick={() => handleAccept(booth.id, a.id)}>
+                                <CheckIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton size="small" onClick={() => handleReject(booth.id, a.id)}>
+                                <CloseIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          ))}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        );
+      })}
     </Box>
   );
 }
