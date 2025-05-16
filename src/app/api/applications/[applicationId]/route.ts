@@ -10,17 +10,17 @@ export async function DELETE(_req: Request, context: { params: Promise<{ applica
   if (!session) {
     return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
   }
-  const userID = await prisma.user.findUnique({
-    where: { studentNo: session.user!.email!.slice(0, 6) },
-    select: { id: true },
-  });
+  // const userID = await prisma.user.findUnique({
+  //   where: { studentNo: session.user!.email!.slice(0, 6) },
+  //   select: { id: true },
+  // });
 
-  const application = await prisma.application.findUnique({
-    where: { id: params.applicationId },
-  });
-  if (!application || application.userId !== userID!.id) {
-    return NextResponse.json({ error: "취소 권한 없음" }, { status: 403 });
-  }
+  // const application = await prisma.application.findUnique({
+  //   where: { id: params.applicationId },
+  // });
+  // if (!application || application.userId !== userID!.id) {
+  //   return NextResponse.json({ error: "취소 권한 없음" }, { status: 403 });
+  // }
 
   await prisma.application.delete({ where: { id: params.applicationId } });
   return NextResponse.json({ success: true });
