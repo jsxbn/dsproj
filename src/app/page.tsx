@@ -23,9 +23,14 @@ export default function MyApp() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [booths, setBooths] = useState<Booth[]>([]);
 
+  // useEffect(() => {
+  //   if (session.status === "unauthenticated") {
+  //     router.replace("/login");
+  //   }
+  // }, [session.status, router]);
   useEffect(() => {
     if (session.status === "unauthenticated") {
-      router.replace("/login");
+      router.replace("/api/auth/signin");
     }
   }, [session.status, router]);
 
