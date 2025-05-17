@@ -23,6 +23,7 @@ export default function MyApp() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [booths, setBooths] = useState<Booth[]>([]);
 
+  //TODO: deploy 시 이 부분 주석 해제
   // useEffect(() => {
   //   if (session.status === "unauthenticated") {
   //     router.replace("/login");

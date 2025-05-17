@@ -88,7 +88,9 @@ export default function ApplicationsViewer({ applications }: ApplicationsViewerP
       <Box display="flex" height={240} mt={1}>
         {/* 승인된 신청 */}
         <Box width="50%" px={1} sx={{ overflowY: "auto" }}>
-          <Typography variant="h6">✔️ 승인된 신청</Typography>
+          <Typography variant="h6" style={{ marginBottom: 5 }}>
+            ✔️ 승인된 신청
+          </Typography>
           {accepted.length > 0 ? (
             renderList(accepted)
           ) : (
@@ -102,7 +104,9 @@ export default function ApplicationsViewer({ applications }: ApplicationsViewerP
 
         {/* 대기중인 신청 */}
         <Box width="50%" px={1} sx={{ overflowY: "auto" }}>
-          <Typography variant="h6">⏳ 대기중인 신청</Typography>
+          <Typography variant="h6" style={{ marginBottom: 5 }}>
+            ⏳ 대기중인 신청
+          </Typography>
           {pending.length > 0 ? (
             renderList(pending)
           ) : (
