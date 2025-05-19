@@ -178,7 +178,7 @@ export default function BoothModal({ booth, userApplications, onClose }: BoothMo
           <div className="py-4 space-y-3">
             <div className="space-y-2">
               <Label htmlFor="slot">세션 선택</Label>
-              <Select id="slot" value={selected} onValueChange={setSelected} disabled={hasApplied || amIOperator}>
+              <Select value={selected} onValueChange={setSelected} disabled={hasApplied || amIOperator}>
                 <SelectTrigger className="w-full border-gray-300">
                   <SelectValue placeholder="세션을 선택해 주세요." />
                 </SelectTrigger>
