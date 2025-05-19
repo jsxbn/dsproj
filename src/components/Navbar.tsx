@@ -1,14 +1,17 @@
 "use client";
-import { Button, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import { Button } from "./ui/button";
 
 export default function NavigationBar() {
   const session = useSession();
   return (
     <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", padding: "0 0 0 16px" }}>
       <Link href="/" style={{ textDecoration: "none", color: "black" }}>
-        <h1>SACHEDULE</h1>
+        <Typography variant="h4" style={{ marginTop: 20, fontWeight: 700 }}>
+          SACHEDULE
+        </Typography>
       </Link>
       {session.data && session.data.user && (
         <div
@@ -23,9 +26,9 @@ export default function NavigationBar() {
         >
           <Typography style={{ fontWeight: 400, fontSize: 16 }}>{session.data.user.name}</Typography>
           <Link href="/mybooth">
-            <Button variant="outlined">관리자 페이지로 이동</Button>
+            <Button>관리자 페이지로 이동</Button>
           </Link>
-          <Button color="secondary" onClick={() => signOut({})}>
+          <Button variant="ghost" onClick={() => signOut({})}>
             로그아웃
           </Button>
         </div>

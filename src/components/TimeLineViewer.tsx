@@ -38,8 +38,8 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
   hideEdgeMarkers = true,
   showNowBadge = true,
   nowUpdateInterval = 60000,
-  itemColor = "#edf5fb",
-  itemHoverColor = "#E1EAF9",
+  itemColor = "#d8e0e6",
+  itemHoverColor = "#bfcade",
   applications,
 }) => {
   // 0) “Now” 라인용 현재 시각 갱신

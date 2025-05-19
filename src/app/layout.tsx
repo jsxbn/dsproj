@@ -9,6 +9,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { GlobalStyles } from "@mui/material";
 import { SessionProvider } from "next-auth/react";
 import NavigationBar from "@/components/Navbar";
+import "./globals.css";
 
 const pretendard = localFont({
   src: "../fonts/PretendardVariable.woff2",
@@ -37,7 +38,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 }}
               />
               <NavigationBar></NavigationBar>
-              <div id="modal-root"></div>
               <Suspense>{children}</Suspense>
             </ThemeProvider>
           </AppRouterCacheProvider>

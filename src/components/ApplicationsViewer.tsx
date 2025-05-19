@@ -2,9 +2,17 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import type { Application } from "@/app/utils/schemaTypes";
-import { Divider, Typography, Box, Button, CircularProgress } from "@mui/material";
 import { useRouter } from "next/navigation";
+import type { Application } from "@/app/utils/schemaTypes";
+
+// shadcn-ui
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+
+// lucide icons for spinner + status icons
+import { Loader2, Check, Hourglass } from "lucide-react";
 
 interface ApplicationsViewerProps {
   applications: Application[];
@@ -12,23 +20,23 @@ interface ApplicationsViewerProps {
 
 export default function ApplicationsViewer({ applications }: ApplicationsViewerProps) {
   const router = useRouter();
-  // 1) 로컬 상태로 복사
+
+  // 1) 로컬 복사
   const [appList, setAppList] = useState<Application[]>(applications);
   useEffect(() => {
     setAppList(applications);
   }, [applications]);
 
-  // 2) 삭제 처리 중인 ID 집합
+  // 2) 삭제 중 ID 세트
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
   // 3) 취소 핸들러
   const handleCancel = async (appId: string) => {
     if (!confirm("이 신청을 정말 취소하시겠습니까?")) return;
     setDeletingIds((s) => new Set(s).add(appId));
+
     try {
-      const res = await fetch(`/api/applications/${appId}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`/api/applications/${appId}`, { method: "DELETE" });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "취소 실패");
       // 로컬 리스트에서 제거
@@ -45,11 +53,11 @@ export default function ApplicationsViewer({ applications }: ApplicationsViewerP
     }
   };
 
-  // 4) 승인된 / 대기중 분리
+  // 4) 승인 / 대기 분리
   const accepted = appList.filter((a) => a.isAccepted);
   const pending = appList.filter((a) => !a.isAccepted);
 
-  // 5) 슬롯 시간 계산 헬퍼
+  // 5) 슬롯 포맷터
   const formatSlot = (app: Application) => {
     const b = app.booth;
     if (!b) return "";
@@ -61,61 +69,97 @@ export default function ApplicationsViewer({ applications }: ApplicationsViewerP
     return `${fmt(s)} - ${fmt(e)}`;
   };
 
-  const renderList = (list: Application[]) =>
-    list.map((app) => {
-      const isDeleting = deletingIds.has(app.id);
-      return (
-        <Box key={app.id} display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-          <Box>
-            <Typography variant="subtitle1">{app.booth?.name || "알 수 없는 부스"}</Typography>
-            <Typography variant="body2" color="text.secondary">
-              {formatSlot(app)} <small>({new Date(app.createdAt).toLocaleDateString()})</small>
-            </Typography>
-          </Box>
-          <Button size="small" color="error" disabled={isDeleting} onClick={() => handleCancel(app.id)}>
-            {isDeleting ? <CircularProgress size={16} color="inherit" /> : "취소"}
-          </Button>
-        </Box>
-      );
-    });
-
   return (
-    <Box mt={2}>
-      <Typography variant="h5" fontWeight={700}>
-        나의 신청 현황
-      </Typography>
+    <div className="space-y-4 mt-6">
+      {/* 헤더 */}
+      <h3 className="text-lg font-semibold">나의 신청 현황</h3>
 
-      <Box display="flex" height={240} mt={1}>
+      {/* 좌우 카드 그리드 */}
+      <div className="grid grid-cols-2 gap-4 h-[240px]">
         {/* 승인된 신청 */}
-        <Box width="50%" px={1} sx={{ overflowY: "auto" }}>
-          <Typography variant="h6" style={{ marginBottom: 5 }}>
-            ✔️ 승인된 신청
-          </Typography>
-          {accepted.length > 0 ? (
-            renderList(accepted)
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              승인된 신청이 없습니다.
-            </Typography>
-          )}
-        </Box>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <Check className="w-5 h-5 text-green-500" />
+              <CardTitle>승인된 신청</CardTitle>
+            </div>
+          </CardHeader>
 
-        <Divider orientation="vertical" flexItem />
+          <Separator />
+
+          <CardContent className="p-0">
+            <ScrollArea className="h-[192px]">
+              <div className="p-4 space-y-3">
+                {accepted.length > 0 ? (
+                  accepted.map((app) => {
+                    const isDeleting = deletingIds.has(app.id);
+                    return (
+                      <div key={app.id} className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{app.booth?.name ?? "알 수 없는 부스"}</p>
+                          <p className="text-sm text-muted-foreground">{formatSlot(app)} </p>
+                        </div>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          disabled={isDeleting}
+                          onClick={() => handleCancel(app.id)}
+                        >
+                          {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "취소"}
+                        </Button>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-sm text-muted-foreground">승인된 신청이 없습니다.</p>
+                )}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
 
         {/* 대기중인 신청 */}
-        <Box width="50%" px={1} sx={{ overflowY: "auto" }}>
-          <Typography variant="h6" style={{ marginBottom: 5 }}>
-            ⏳ 대기중인 신청
-          </Typography>
-          {pending.length > 0 ? (
-            renderList(pending)
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              대기중인 신청이 없습니다.
-            </Typography>
-          )}
-        </Box>
-      </Box>
-    </Box>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <Hourglass className="w-5 h-5 text-yellow-500" />
+              <CardTitle>대기중인 신청</CardTitle>
+            </div>
+          </CardHeader>
+
+          <Separator />
+
+          <CardContent className="p-0">
+            <ScrollArea className="h-[192px]">
+              <div className="p-4 space-y-3">
+                {pending.length > 0 ? (
+                  pending.map((app) => {
+                    const isDeleting = deletingIds.has(app.id);
+                    return (
+                      <div key={app.id} className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{app.booth?.name ?? "알 수 없는 부스"}</p>
+                          <p className="text-sm text-muted-foreground">{formatSlot(app)} </p>
+                        </div>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          disabled={isDeleting}
+                          onClick={() => handleCancel(app.id)}
+                        >
+                          {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "취소"}
+                        </Button>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-sm text-muted-foreground">대기중인 신청이 없습니다.</p>
+                )}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

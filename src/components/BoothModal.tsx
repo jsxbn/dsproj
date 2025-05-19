@@ -1,31 +1,42 @@
-// src/components/BoothModal.tsx
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import Portal from "./Portal";
-import styles from "./BoothModal.module.css";
-import { FormControl, InputLabel, Select, MenuItem, Button, CircularProgress, Typography } from "@mui/material";
+import React, { useState, useEffect, useMemo } from "react";
 import type { Booth, Application } from "@/app/utils/schemaTypes";
 import { useSession } from "next-auth/react";
 
+// shadcn-ui
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+
+// icons
+import { MapPin, Info, Calendar, Clock, Loader2 } from "lucide-react";
+
 interface BoothModalProps {
   booth: Booth | null;
-  // 부모가 넘겨주는, 이미 수락된 나의 Application[]
   userApplications: Application[];
   onClose: () => void;
 }
 
 export default function BoothModal({ booth, userApplications, onClose }: BoothModalProps) {
   const { data: session } = useSession();
-  // ─── 1) 슬롯별 수락된 신청 count ─────────────────
+
+  // 1) 슬롯별 수락 카운트
   const [slotCounts, setSlotCounts] = useState<Record<number, number>>({});
   useEffect(() => {
-    if (!booth) {
-      setSlotCounts({});
-      return;
-    }
+    if (!booth) return setSlotCounts({});
     fetch(`/api/applications/count?boothId=${booth.id}`)
-      .then((res) => res.json())
+      .then((r) => r.json())
       .then((data) => {
         const m: Record<number, number> = {};
         data.counts.forEach((c: { slotIndex: number; count: number }) => (m[c.slotIndex] = c.count));
@@ -34,193 +45,176 @@ export default function BoothModal({ booth, userApplications, onClose }: BoothMo
       .catch(() => setSlotCounts({}));
   }, [booth]);
 
-  // ─── 2) 이미 이 부스에 수락된 내 신청이 있는지, 내가 관리자는 아닌지 ──────────
-  const hasAppliedToThisBooth = useMemo(() => {
-    if (!booth) return false;
-    return userApplications.some((app) => app.boothId === booth.id);
-  }, [userApplications, booth]);
-  const amIoperator = useMemo(() => {
-    if (!booth) return false;
-    return booth.operatorId === session!.user!.id;
-  }, [booth, session]);
+  // 2) 이미 신청했는지 / 운영자인지
+  const hasApplied = useMemo(
+    () => !!booth && userApplications.some((app) => app.boothId === booth.id),
+    [userApplications, booth]
+  );
+  const amIOperator = useMemo(
+    () => !!booth && !!session?.user && booth.operatorId === session.user.id,
+    [booth, session]
+  );
 
-  // ─── 3) 이 부스의 세션(슬롯) 리스트 생성 ────────────
+  // 3) 슬롯 계산
   const slots = useMemo(() => {
     if (!booth) return [];
     const out: { slotIndex: number; start: Date; end: Date }[] = [];
     const startMs = new Date(booth.startAt).getTime();
     const endMs = new Date(booth.endAt).getTime();
-    const intervalMs = booth.slotInterval * 60 * 1000;
+    const step = booth.slotInterval * 60 * 1000;
     let idx = 0;
-    for (let t = startMs; t + intervalMs <= endMs; t += intervalMs, idx++) {
+    for (let t = startMs; t + step <= endMs; t += step, idx++) {
       out.push({
         slotIndex: idx,
         start: new Date(t),
-        end: new Date(t + intervalMs),
+        end: new Date(t + step),
       });
     }
     return out;
   }, [booth]);
 
-  // ─── 4) 내 다른 승인된 application 일정 (겹침 체크용) ───
-  const myAcceptedWindows = useMemo(() => {
+  // 4) 내 Accepted 일정 (겹침 체크)
+  const myWindows = useMemo(() => {
     return userApplications
-      .filter((app) => app.isAccepted && app.booth)
-      .map((app) => {
-        const base = new Date(app.booth!.startAt).getTime();
-        const s = base + app.slotIndex * app.booth!.slotInterval * 60 * 1000;
-        const e = s + app.booth!.slotInterval * 60 * 1000;
-        return { start: s, end: e };
+      .filter((a) => a.isAccepted && a.booth)
+      .map((a) => {
+        const base = new Date(a.booth!.startAt).getTime();
+        const s = base + a.slotIndex * a.booth!.slotInterval * 60 * 1000;
+        return { start: s, end: s + a.booth!.slotInterval * 60 * 1000 };
       });
   }, [userApplications]);
 
-  // ─── 5) 드롭다운 선택값·신청중 플래그 ────────────────
-  const [selectedSlot, setSelectedSlot] = useState<string>("");
-  const [isApplying, setIsApplying] = useState(false);
+  // 5) form state
+  const [selected, setSelected] = useState<string>("");
+  const [loading, setLoading] = useState(false);
 
-  // ─── 6) ESC 키로 모달 닫기 ──────────────────────────
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  // booth 가 없으면 렌더링 스킵
   if (!booth) return null;
 
-  // 시간 포맷터
-  const fmtTime = (d: Date) =>
+  const fmt = (d: Date) =>
     d.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
 
-  // 신청 핸들러
-  const handleApply = async () => {
-    if (!selectedSlot) {
-      alert("세션을 선택해주세요.");
-      return;
+  const apply = async () => {
+    if (!selected) {
+      return alert("세션을 선택해주세요.");
     }
-    setIsApplying(true);
+    setLoading(true);
     try {
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           boothId: booth.id,
-          slotIndex: parseInt(selectedSlot, 10),
+          slotIndex: parseInt(selected, 10),
         }),
       });
       const body = await res.json();
-      if (!res.ok) throw new Error(body.error || "신청 실패");
-      alert("신청이 완료되었습니다!");
+      if (!res.ok) throw new Error(body.error || "실패");
+      alert("신청 완료!");
       onClose();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (e: any) {
+      alert(e.message);
     } finally {
-      setIsApplying(false);
+      setLoading(false);
     }
   };
 
   return (
-    <Portal>
-      <div className={styles.backdrop} onClick={onClose}>
-        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-          {/* 헤더 */}
-          <div className={styles.header}>{booth.name}</div>
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg rounded-lg border bg-white shadow-xl p-6">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-semibold">{booth.name}</DialogTitle>
+          <DialogDescription> 부스 상세 정보를 확인하고, 원하는 세션에 신청하세요.</DialogDescription>
+        </DialogHeader>
 
-          {/* 본문 */}
-          <div className={styles.content}>
-            {/* 부스 상세 정보 */}
-            <Typography gutterBottom>
-              <strong>장소:</strong> {booth.where}
-            </Typography>
-            <Typography gutterBottom>
-              <strong>설명:</strong> {booth.description ?? "-"}
-            </Typography>
-            <Typography gutterBottom>
-              <strong>시작:</strong>{" "}
-              {new Date(booth.startAt).toLocaleString([], {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </Typography>
-            <Typography gutterBottom>
-              <strong>종료:</strong>{" "}
-              {new Date(booth.endAt).toLocaleString([], {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </Typography>
-            <Typography gutterBottom>
-              <strong>슬롯 인원:</strong> {booth.capacity}명
-            </Typography>
+        <div className="divide-y divide-gray-200 text-gray-700">
+          {/* 부스 메타 정보 */}
+          <div className="pb-4">
+            {/* grid-cols-1 은 모바일, sm 부터 grid-template-columns: max-content 1fr */}
+            <dl className="grid grid-cols-1 gap-y-3 gap-x-6 sm:grid-cols-[max-content_1fr] sm:items-start">
+              <dt className="flex items-center space-x-1 text-sm font-medium text-gray-900">
+                <MapPin className="h-4 w-4 text-gray-400" />
+                <span>장소</span>
+              </dt>
+              <dd className="text-sm text-gray-700">{booth.where}</dd>
 
-            {/* 이미 이 부스에 예약된 경우 */}
-            {hasAppliedToThisBooth && (
-              <Typography color="error" gutterBottom>
-                이미 이 부스에 신청했습니다.
-              </Typography>
-            )}
-            {amIoperator && (
-              <Typography color="error" gutterBottom>
-                운영자는 자신의 부스에 신청할 수 없습니다.
-              </Typography>
-            )}
+              <dt className="flex items-center space-x-1 text-sm font-medium text-gray-900">
+                <Info className="h-4 w-4 text-gray-400" />
+                <span>설명</span>
+              </dt>
+              <dd className="text-sm text-gray-700">{booth.description || "-"}</dd>
 
-            {/* 세션 드롭다운 */}
-            <FormControl fullWidth margin="normal" disabled={hasAppliedToThisBooth || amIoperator}>
-              <InputLabel id="slot-select-label">세션 선택</InputLabel>
-              <Select
-                labelId="slot-select-label"
-                label="세션 선택"
-                value={selectedSlot}
-                onChange={(e) => setSelectedSlot(e.target.value)}
-              >
-                {slots.map((slot) => {
-                  const used = slotCounts[slot.slotIndex] ?? 0;
-                  const full = used >= booth.capacity;
-                  const overlap = myAcceptedWindows.some(
-                    ({ start, end }) => Math.max(start, slot.start.getTime()) < Math.min(end, slot.end.getTime())
-                  );
-                  return (
-                    <MenuItem key={slot.slotIndex} value={slot.slotIndex.toString()} disabled={full || overlap}>
-                      {`${fmtTime(slot.start)} - ${fmtTime(slot.end)}`} ({used}/{booth.capacity}){" "}
-                      {overlap && "(시간 겹침)"}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
+              <dt className="flex items-center space-x-1 text-sm font-medium text-gray-900">
+                <Calendar className="h-4 w-4 text-gray-400" />
+                <span>기간</span>
+              </dt>
+              <dd className="text-sm text-gray-700">
+                {new Date(booth.startAt).toLocaleDateString()} – {new Date(booth.endAt).toLocaleDateString()}
+              </dd>
+
+              <dt className="flex items-center space-x-1 text-sm font-medium text-gray-900">
+                <Clock className="h-4 w-4 text-gray-400" />
+                <span>시간</span>
+              </dt>
+              <dd className="text-sm text-gray-700">
+                {new Date(booth.startAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} –{" "}
+                {new Date(booth.endAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </dd>
+
+              <dt className="flex items-center space-x-1 text-sm font-medium text-gray-900">
+                <span>슬롯 인원</span>
+              </dt>
+              <dd className="text-sm">
+                <Badge variant="outline" className="text-sm">
+                  {booth.capacity}명
+                </Badge>
+              </dd>
+            </dl>
           </div>
 
-          {/* 푸터 */}
-          <div className={styles.footer}>
-            <Button style={{ marginRight: 5 }} onClick={onClose} variant="outlined" disabled={isApplying}>
-              닫기
-            </Button>
-            <Button
-              onClick={handleApply}
-              variant="contained"
-              disabled={isApplying || hasAppliedToThisBooth || selectedSlot === ""}
-            >
-              {isApplying ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : hasAppliedToThisBooth ? (
-                "이미 예약됨"
-              ) : (
-                "신청"
-              )}
-            </Button>
+          {/* 세션 셀렉트 */}
+          <div className="py-4 space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="slot">세션 선택</Label>
+              <Select id="slot" value={selected} onValueChange={setSelected} disabled={hasApplied || amIOperator}>
+                <SelectTrigger className="w-full border-gray-300">
+                  <SelectValue placeholder="세션을 선택해 주세요." />
+                </SelectTrigger>
+                <SelectContent>
+                  {slots.map((s) => {
+                    const used = slotCounts[s.slotIndex] || 0;
+                    const full = used >= booth.capacity;
+                    const overlap = myWindows.some(
+                      (w) => Math.max(w.start, s.start.getTime()) < Math.min(w.end, s.end.getTime())
+                    );
+                    const label = `${fmt(s.start)} – ${fmt(s.end)} (${used}/${booth.capacity}) ${
+                      overlap ? "(겹침)" : ""
+                    }`;
+                    return (
+                      <SelectItem key={s.slotIndex} value={s.slotIndex.toString()} disabled={full || overlap}>
+                        {label}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+            {hasApplied && <p className="mb-2 text-sm text-red-600">이미 이 부스에 신청하셨습니다.</p>}
+            {amIOperator && <p className="mb-2 text-sm text-red-600">운영자는 본인 부스에 신청할 수 없습니다.</p>}
           </div>
         </div>
-      </div>
-    </Portal>
+
+        <DialogFooter className="mt-6 pt-4 border-t border-gray-200 flex justify-end space-x-2">
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            닫기
+          </Button>
+          <Button onClick={apply} disabled={loading || hasApplied || !selected}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : hasApplied ? "이미 예약됨" : "신청"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

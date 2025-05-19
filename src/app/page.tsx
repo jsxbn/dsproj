@@ -105,7 +105,7 @@ export default function MyApp() {
   return (
     <Box px={2} maxWidth={3000}>
       {/* <ApplicationsViewer /> */}
-      <Typography variant="h5" fontWeight={700} style={{ marginBottom: 10 }}>
+      <Typography variant="h5" fontWeight={500} style={{ marginBottom: 10 }}>
         SAC 전체일정
       </Typography>
       <Box
