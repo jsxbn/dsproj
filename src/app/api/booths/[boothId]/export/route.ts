@@ -6,7 +6,8 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/utils/authOptions";
 
-export async function GET(_req: Request, { params }: { params: { boothId: string } }) {
+export async function GET(_req: Request, context: { params: Promise<{ boothId: string }> }) {
+  const params = await context.params;
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
 
