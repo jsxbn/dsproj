@@ -77,7 +77,7 @@ export default function BoothModal({ booth, userApplications, onClose }: BoothMo
   // 4) 내 Accepted 일정 (겹침 체크)
   const myWindows = useMemo(() => {
     return userApplications
-      .filter((a) => a.isAccepted && a.booth)
+      .filter((a) => a.booth)
       .map((a) => {
         const base = new Date(a.booth!.startAt).getTime();
         const s = base + a.slotIndex * a.booth!.slotInterval * 60 * 1000;
