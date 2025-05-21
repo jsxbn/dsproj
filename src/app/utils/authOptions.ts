@@ -1,7 +1,6 @@
 export const runtime = "nodejs";
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import CredentialsProvider from "next-auth/providers/credentials"; // 추가!
 import prisma from "@/lib/prisma";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -17,29 +16,6 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-    // 개발 환경에서만 CredentialsProvider 추가
-    // ...(isDev
-    //   ? [
-    CredentialsProvider({
-      // 로그인 폼에 입력 받을 필드 정의
-      name: "Test Account",
-      credentials: {
-        studentNo: { label: "학생번호", type: "text" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        // 테스트 계정 정보 하드코딩 (여러개 원하면 배열로 가능)
-        if (!credentials) return null;
-        // NextAuth에 넘길 유저 객체
-        return {
-          id: "dd",
-          name: credentials.studentNo,
-          email: `${credentials.studentNo}@ksa.hs.kr`, // 임의 이메일
-        };
-      },
-    }),
-    //   ]
-    // : []),
   ],
 
   secret: process.env.NEXTAUTH_SECRET,
@@ -79,10 +55,10 @@ export const authOptions: NextAuthOptions = {
     },
   },
 
-  // ...(isProd && {
-  //   pages: {
-  //     signIn: "/login",
-  //     error: "/login",
-  //   },
-  // }),
+  ...(isProd && {
+    pages: {
+      signIn: "/login",
+      error: "/login",
+    },
+  }),
 };

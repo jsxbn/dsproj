@@ -24,16 +24,16 @@ export default function MyApp() {
   const [booths, setBooths] = useState<Booth[]>([]);
 
   //TODO: deploy 시 이 부분 주석 해제
-  // useEffect(() => {
-  //   if (session.status === "unauthenticated") {
-  //     router.replace("/login");
-  //   }
-  // }, [session.status, router]);
   useEffect(() => {
     if (session.status === "unauthenticated") {
-      router.replace("/api/auth/signin");
+      router.replace("/login");
     }
   }, [session.status, router]);
+  // useEffect(() => {
+  //   if (session.status === "unauthenticated") {
+  //     router.replace("/api/auth/signin");
+  //   }
+  // }, [session.status, router]);
 
   useEffect(() => {
     if (session.status === "authenticated" && session?.data?.user?.id) {
