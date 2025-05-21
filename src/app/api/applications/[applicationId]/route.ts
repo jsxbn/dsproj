@@ -29,10 +29,6 @@ export async function DELETE(_req: Request, context: { params: Promise<{ applica
   if (!application) {
     return NextResponse.json({ error: "신청 내역을 찾을 수 없습니다." }, { status: 404 });
   }
-  // Only the booth operator can reject
-  if (application.booth.operatorId !== session?.user?.id) {
-    return NextResponse.json({ error: "권한 없음" }, { status: 403 });
-  }
 
   // Delete the application
   await prisma.application.delete({ where: { id: params.applicationId } });
