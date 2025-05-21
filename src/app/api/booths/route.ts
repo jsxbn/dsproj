@@ -1,3 +1,5 @@
+//app/api/booth/route.ts
+export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
@@ -17,27 +19,31 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
+    }
+
+    const { name, description, where, startAt, endAt, slotInterval, capacity } = await req.json();
+
+    const userID = session.user?.id;
+
+    const booth = await prisma.booth.create({
+      data: {
+        name,
+        description,
+        where,
+        startAt: new Date(startAt),
+        endAt: new Date(endAt),
+        slotInterval,
+        capacity,
+        operatorId: userID!,
+      },
+    });
+
+    return NextResponse.json(booth, { status: 201 });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message || "서버 오류" }, { status: 500 });
   }
-
-  const { name, description, where, startAt, endAt, slotInterval, capacity } = await req.json();
-
-  const userID = session.user?.id;
-
-  const booth = await prisma.booth.create({
-    data: {
-      name,
-      description,
-      where,
-      startAt: new Date(startAt),
-      endAt: new Date(endAt),
-      slotInterval,
-      capacity,
-      operatorId: userID!,
-    },
-  });
-
-  return NextResponse.json(booth, { status: 201 });
 }

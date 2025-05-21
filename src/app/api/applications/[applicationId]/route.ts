@@ -22,7 +22,30 @@ export async function DELETE(_req: Request, context: { params: Promise<{ applica
   //   return NextResponse.json({ error: "취소 권한 없음" }, { status: 403 });
   // }
 
+  const application = await prisma.application.findUnique({
+    where: { id: params.applicationId },
+    include: { booth: true, user: true },
+  });
+  if (!application) {
+    return NextResponse.json({ error: "신청 내역을 찾을 수 없습니다." }, { status: 404 });
+  }
+  // Only the booth operator can reject
+  if (application.booth.operatorId !== session?.user?.id) {
+    return NextResponse.json({ error: "권한 없음" }, { status: 403 });
+  }
+
+  // Delete the application
   await prisma.application.delete({ where: { id: params.applicationId } });
+
+  // Create a notification for the user
+  const message = `${application.booth.name} 부스 신청이 거절되었습니다.`;
+  await prisma.notification.create({
+    data: {
+      userId: application.userId,
+      message,
+    },
+  });
+
   return NextResponse.json({ success: true });
 }
 

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import type { Booth, Application } from "@/app/utils/schemaTypes";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 // shadcn-ui
 import {
@@ -30,7 +31,7 @@ interface BoothModalProps {
 
 export default function BoothModal({ booth, userApplications, onClose }: BoothModalProps) {
   const { data: session } = useSession();
-
+  const router = useRouter();
   // 1) 슬롯별 수락 카운트
   const [slotCounts, setSlotCounts] = useState<Record<number, number>>({});
   useEffect(() => {
@@ -113,6 +114,7 @@ export default function BoothModal({ booth, userApplications, onClose }: BoothMo
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "실패");
       alert("신청 완료!");
+      router.refresh();
       onClose();
     } catch (e: any) {
       alert(e.message);

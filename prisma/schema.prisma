@@ -13,13 +13,14 @@ model User {
   name      String
   createdAt DateTime @default(now())
 
-  booths       Booth[]       @relation("OperatorBooths")
-  applications Application[]
+  booths        Booth[]        @relation("OperatorBooths")
+  applications  Application[]
+  notifications Notification[]
 }
 
 model Booth {
   id           String   @id @default(uuid())
-  name         String   
+  name         String
   description  String?
   operatorId   String
   operator     User     @relation("OperatorBooths", fields: [operatorId], references: [id])
@@ -35,9 +36,9 @@ model Booth {
 
 model Application {
   id        String @id @default(uuid())
-  boothId   String 
+  boothId   String
   booth     Booth  @relation(fields: [boothId], references: [id], onDelete: Cascade)
-  userId    String 
+  userId    String
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   slotIndex Int // 0부터 시작: booth 운영시간/interval에 따라 세션 인덱스 결정
 
@@ -45,4 +46,15 @@ model Application {
   createdAt  DateTime @default(now())
 
   @@unique([boothId, slotIndex, userId]) // 같은 사람이 같은 슬롯 중복 신청 방지
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
 }
